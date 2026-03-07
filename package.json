@@ -1,0 +1,30 @@
+{
+  "name": "computer-graphics-task-4-group-project",
+  "version": "1.0.0",
+  "description": "Hyper demon + InfinatePizza",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack serve --open",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebastianrobak2004/Computer-Graphics-Task-4-Group-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sebastianrobak2004/Computer-Graphics-Task-4-Group-Project/issues"
+  },
+  "homepage": "https://github.com/sebastianrobak2004/Computer-Graphics-Task-4-Group-Project#readme",
+  "dependencies": {
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "raw-loader": "^4.0.2",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.3"
+  }
+}
