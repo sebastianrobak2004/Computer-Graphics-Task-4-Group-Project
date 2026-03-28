@@ -1,51 +1,69 @@
-
-
-export const camera_controls = {
-    foward: false,
-    backward: false,
-    left: false,
-    right: false,
-    turn_left: false,
-    turn_right: false,
-    rise: false,
-    fall: false,
+const keyCodeMap = {
+	w: 38,
+	s: 40,
+	a: 37,
+	d: 39,
+	SHIFT: 16,
+	CTRL: 17,
+	SPACE: 32,
 };
 
-// w: 38
-// s: 30
-// a: 37
-// d: 39
-// SHIFT: 16
-// CTRL: 17
-// SPACE: 32
-
-function KeyPressed(event){
-    switch(event.keyCode)
-    {
-        case 38: camera_controls.foward = true; break;
-        case 40: camera_controls.backward = true; break;
-        case 37: camera_controls.left = true; break;
-        case 39: camera_controls.right = true; break;
-        case 32: camera_controls.rise = true; break;
-        case 16: camera_controls.fall = true; break;
-    }
+export const movementState = {
+	isMovingForward: false,
+	isMovingBackward: false,
+	isMovingLeft: false,
+	isMovingRight: false,
+	isTurningLeft: false,
+	isTurningRight: false,
+	isRising: false,
+	isFalling: false,
 };
 
-function KeyReleased(event){
-    switch(event.keyCode)
-    {
-        case 38: camera_controls.foward = false; break;
-        case 40: camera_controls.backward = false; break;
-        case 37: camera_controls.left = false; break;
-        case 39: camera_controls.right = false; break;
-        case 32: camera_controls.rise = false; break;
-        case 16: camera_controls.fall = false; break;
-    }
-};
+function KeyPressed(event) {
+	switch (event.keyCode) {
+		case keyCodeMap['w']:
+			movementState.isMovingForward = true;
+			break;
+		case keyCodeMap['s']:
+			movementState.isMovingBackward = true;
+			break;
+		case keyCodeMap['a']:
+			movementState.isMovingLeft = true;
+			break;
+		case keyCodeMap['d']:
+			movementState.isMovingRight = true;
+			break;
+		case keyCodeMap['SPACE']:
+			movementState.isRising = true;
+			break;
+		case keyCodeMap['SHIFT']:
+			movementState.isFalling = true;
+			break;
+	}
+}
 
+function KeyReleased(event) {
+	switch (event.keyCode) {
+		case keyCodeMap['w']:
+			movementState.isMovingForward = false;
+			break;
+		case keyCodeMap['s']:
+			movementState.isMovingBackward = false;
+			break;
+		case keyCodeMap['a']:
+			movementState.isMovingLeft = false;
+			break;
+		case keyCodeMap['d']:
+			movementState.isMovingRight = false;
+			break;
+		case keyCodeMap['SPACE']:
+			movementState.isRising = false;
+			break;
+		case keyCodeMap['SHIFT']:
+			movementState.isFalling = false;
+			break;
+	}
+}
 
-
-
-
-window.addEventListener("keydown", KeyPressed, false );
-window.addEventListener("keyup", KeyReleased, false );
+window.addEventListener('keydown', KeyPressed, false);
+window.addEventListener('keyup', KeyReleased, false);
