@@ -1,12 +1,11 @@
 import * as THREE from 'three';
-import { scene, camera, renderer, timer } from './scene_manager.js';
+import { scene, camera, renderer, timer, doSetup } from './sceneManager.js';
 import { floor_mesh, update_shaders } from './floor.js';
 import { movementState } from './controls.js';
 
-scene.add(floor_mesh);
+doSetup();
 
-camera.position.set(0, 0, -10);
-camera.lookAt(0, -1, 1);
+scene.add(floor_mesh);
 
 const SPEED = 10;
 function move_camera() {
