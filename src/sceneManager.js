@@ -23,6 +23,7 @@ const setupCamera = () => {
 		cameraNearPlane,
 		cameraFarPlane,
 	);
+
 	camera.position.set(0, 0, -10);
 	camera.lookAt(0, -1, 1);
 };
@@ -39,7 +40,7 @@ const setupRenderer = () => {
 
 const setupSunlight = () => {
 	sunlight = new THREE.DirectionalLight(0xffffff, 0.5);
-	scene.add(sun_light);
+	scene.add(sunlight);
 };
 
 const setupTimer = () => {
@@ -75,7 +76,6 @@ function setupUpdateFunction(...functions) {
 
 function update() {
 	timer.update();
-	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
 	move_camera();
 
@@ -96,6 +96,6 @@ export function doSetup() {
 	// Geometry setup
 	const floorUpdateFunction = setupFloor();
 
-	// Register functions to be run on animation loop here
+	// Register functions to be run in update here
 	setupUpdateFunction(floorUpdateFunction, move_camera);
 }
