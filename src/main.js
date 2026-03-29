@@ -5,10 +5,8 @@ import { movementState } from './controls.js';
 
 doSetup();
 
-scene.add(floor_mesh);
-
 const SPEED = 10;
-function move_camera() {
+export function move_camera() {
 	if (movementState.isMovingForward) {
 		camera.position.z += SPEED;
 	}
@@ -34,17 +32,3 @@ function move_camera() {
 	if (movementState.isTurningLeft) {
 	}
 }
-
-// Register functions to be run on animation loop here
-function update() {
-	timer.update();
-	update_shaders();
-
-	requestAnimationFrame(animate);
-
-	move_camera();
-
-	renderer.render(scene, camera);
-}
-
-renderer.setAnimationLoop(update);
