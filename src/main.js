@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { scene, camera, renderer, timer, doSetup } from './sceneManager.js';
-import { floor_mesh, update_shaders } from './floor.js';
+import { camera, doSetup } from './sceneManager.js';
 import { movementState } from './controls.js';
 
 doSetup();
