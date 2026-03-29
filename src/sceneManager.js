@@ -63,15 +63,8 @@ const setupResizeFunction = () => {
 	window.addEventListener('resize', OnResize);
 };
 
-function setupUpdateFunction(...functions) {
-	// Append all functions to the updateFunctionsList
-	for (const fn of functions) {
-		if (typeof fn === 'function') {
-			updateFunctions.push(fn);
-		}
-	}
-
-	renderer.setAnimationLoop(update);
+export function registerFunctionForSetup(func) {
+	updateFunctions.push(func);
 }
 
 function update() {
@@ -79,6 +72,7 @@ function update() {
 	renderer.render(scene, camera);
 	move_camera();
 
+	// Execute any functions registered outside of the sceneManager
 	for (const fn of updateFunctions) {
 		fn();
 	}
@@ -94,8 +88,7 @@ export function doSetup() {
 	setupResizeFunction();
 
 	// Geometry setup
-	const floorUpdateFunction = setupFloor();
+	setupFloor();
 
-	// Register functions to be run in update here
-	setupUpdateFunction(floorUpdateFunction, move_camera);
+	renderer.setAnimationLoop(update);
 }
