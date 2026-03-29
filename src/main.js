@@ -1,44 +1,54 @@
 import * as THREE from 'three';
-import { scene, camera, renderer } from './scene_manager.js';
-import { floor_mesh } from './floor.js';
+import { scene, camera, renderer, timer } from './scene_manager.js';
+import { floor_mesh, update_shaders } from './floor.js';
 import { movementState } from './controls.js';
 
 scene.add(floor_mesh);
 
-camera.position.set(0, 0, -10);
-camera.lookAt(0, -10, 1);
+camera.position.set(0,0,-10);
+camera.lookAt(0,-1,1);
+
+
+
 
 function animate() {
-	requestAnimationFrame(animate);
+    timer.update();
+    update_shaders();
 
-	renderer.render(scene, camera);
-}
+    requestAnimationFrame( animate );
+    
+    move_camera();
+    
+    renderer.render(scene, camera);
+};
 
+
+const SPEED = 10;
 function move_camera() {
-	if (movementState.isMovingForward) {
-		console.log('forward');
+
+    if(movementState.isMovingForward){
+        camera.position.z += SPEED;
+    };
+
+    if(movementState.isMovingBackward){
+        camera.position.z -= SPEED;
+    };
+
+    if(movementState.isMovingLeft){
+        camera.position.x += SPEED;
+    };
+
+    if(movementState.isMovingRight){
+        camera.position.x -= SPEED;
+    };
+
+	if (movementState.isFalling) {
 	}
 
-	if (movementState.isMovingBackward) {
-		console.log('backward');
+	if (movementState.isTurningRight) {
 	}
 
-	if (camera_controls.isMovingLeft) {
-	}
-
-	if (camera_controls.isMovingRight) {
-	}
-
-	if (camera_controls.isRising) {
-	}
-
-	if (camera_controls.isFalling) {
-	}
-
-	if (camera_controls.isTurningRight) {
-	}
-
-	if (camera_controls.isTurningLeft) {
+	if (movementState.isTurningLeft) {
 	}
 }
 
