@@ -1,10 +1,14 @@
 import * as THREE from 'three';
+import { setupFloor } from './floor';
+import { move_camera } from './main';
 
 export let camera;
 export let scene;
 export let renderer;
 export let sunlight;
 export let timer;
+
+const updateFunctions = [];
 
 const setupCamera = () => {
 	// Camera constants
@@ -58,11 +62,40 @@ const setupResizeFunction = () => {
 	window.addEventListener('resize', OnResize);
 };
 
+function setupUpdateFunction(...functions) {
+	// Append all functions to the updateFunctionsList
+	for (const fn of functions) {
+		if (typeof fn === 'function') {
+			updateFunctions.push(fn);
+		}
+	}
+
+	renderer.setAnimationLoop(update);
+}
+
+function update() {
+	timer.update();
+	requestAnimationFrame(animate);
+	renderer.render(scene, camera);
+	move_camera();
+
+	for (const fn of updateFunctions) {
+		fn();
+	}
+}
+
 export function doSetup() {
+	// Scene setup
 	setupCamera();
 	setupScene();
 	setupRenderer();
 	setupSunlight();
 	setupTimer();
 	setupResizeFunction();
+
+	// Geometry setup
+	const floorUpdateFunction = setupFloor();
+
+	// Register functions to be run on animation loop here
+	setupUpdateFunction(floorUpdateFunction, move_camera);
 }
