@@ -1,34 +1,32 @@
 import * as THREE from 'three';
-
+import { scene, timer } from './sceneManager.js';
 import fragmentShader from './shaders/fragment.glsl?raw';
 import vertexShader from './shaders/vertex.glsl?raw';
 
-import { timer } from './scene_manager.js';
+export const setupFloor = () => {
+	const floorGeometry = new THREE.BoxGeometry(1000, 10, 1000);
 
+	const floorShader = new THREE.ShaderMaterial({
+		uniforms: {
+			u_resolution: {
+				value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+			},
+			u_time: { value: timer.getElapsed() },
+			uLightDir: { value: new THREE.Vector3(0.5, 1.0, 0.5) },
+		},
+		vertexShader: vertexShader,
+		fragmentShader: fragmentShader,
+	});
 
-const floor_geometry = new THREE.BoxGeometry(1000, 10, 1000,);
+	const floorMesh = new THREE.Mesh(floorGeometry, floorShader);
+	floorMesh.position.y -= 50;
+	floorMesh.rotation.z += 0 * Math.PI;
 
-const wire_mat = new THREE.MeshBasicMaterial({
-    color: 0x00ff00,
-    wireframe: true,
-});
+	scene.add(floorMesh);
 
-const shad = new THREE.ShaderMaterial({
-    uniforms: {
-        u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight )},
-        u_time: { value: timer.getElapsed() },
-        uLightDir: { value: new THREE.Vector3(0.5, 1.0, 0.5 ) },
-    },
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader,
-});
+	const updateFloorShaders = () => {
+		floorShader.uniforms.u_time.value = timer.getElapsed();
+	};
 
-export const floor_mesh = new THREE.Mesh(floor_geometry, shad);
-floor_mesh.position.y -= 50;
-floor_mesh.rotation.z += 0 * Math.PI;
-console.log(floor_mesh.geometry.attributes.uv);
-
-export function update_shaders(){
-    shad.uniforms.u_time.value = timer.getElapsed();
+	return updateFloorShaders;
 };
-
