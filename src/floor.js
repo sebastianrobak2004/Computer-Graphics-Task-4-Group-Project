@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, timer } from './sceneManager.js';
+import { registerFunctionForSetup, scene, timer } from './sceneManager.js';
 import fragmentShader from './shaders/fragment.glsl?raw';
 import vertexShader from './shaders/vertex.glsl?raw';
 
@@ -28,5 +28,5 @@ export const setupFloor = () => {
 		floorShader.uniforms.u_time.value = timer.getElapsed();
 	};
 
-	return updateFloorShaders;
+	registerFunctionForSetup(updateFloorShaders);
 };
