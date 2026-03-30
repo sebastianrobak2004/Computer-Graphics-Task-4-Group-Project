@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { setupFloor } from './floor';
 import { move_camera } from './main';
+import { startLevelGeneration } from './levelGenerator';
 
 export let camera;
 export let scene;
@@ -64,6 +65,11 @@ const setupResizeFunction = () => {
 };
 
 export function registerFunctionForSetup(func) {
+    if(typeof func !== 'function'){
+        console.error('Pushed Non-function to function list', func, typeof func);
+    }
+
+
 	updateFunctions.push(func);
 }
 
@@ -74,7 +80,12 @@ function update() {
 
 	// Execute any functions registered outside of the sceneManager
 	for (const fn of updateFunctions) {
-		fn();
+        if(typeof fn !== 'function'){
+            console.error("Not a function", fn);
+        }
+        fn();
+		
+            
 	}
 }
 
@@ -89,6 +100,7 @@ export function doSetup() {
 
 	// Geometry setup
 	setupFloor();
+    startLevelGeneration();
 
 	renderer.setAnimationLoop(update);
 }
