@@ -2,33 +2,59 @@ import * as THREE from 'three';
 import { registerFunctionForSetup, scene, timer } from './sceneManager.js';
 
 const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: false });
-const epsilon = 0.1;
+const epsilon = 0.01;
 
-export const startLevelGeneration = () => {//TODO: 
+export const startLevelGeneration = () => {
     
     
        
    
     const ring = createRingMesh();
+    const level = new THREE.Group();
+    const maximumRings = 10;
 
     ring.scale.set(epsilon,epsilon,10);
     ring.rotateZ(Math.PI/2)
 
 
-    scene.add(ring);
+    scene.add(level);
 
     
     
+    let radius = 1;
     
 
     const levelUpdate = () => {
 
 
         const delta = timer.getDelta();
-        const mult = 1 + (0.5 * delta);
+        const m = (0.5 * delta )
+        const mult = 1 + m;
+        radius += m;
+
+        if (radius > 2){
+            const cur = ring.clone();
+            const randL = decideSegments(8);
+
+            cur.children.forEach((segment, i) => {
+                if (randL[i]) {
+                    cur.remove(segment);
+                }
+            });
 
 
-        ring.scale.multiply(new THREE.Vector3(mult, mult, 10));
+            level.add(cur);
+            radius = 1;
+            if (level.children.length > maximumRings ){
+                level.remove(level.children[0]);
+            }
+        }
+
+        level.children.forEach( curRing =>{
+            curRing.scale.multiply(new THREE.Vector3(mult, mult, 1));
+        })
+
+        
            
     }
 
@@ -36,6 +62,10 @@ export const startLevelGeneration = () => {//TODO:
     registerFunctionForSetup(levelUpdate);
 }
 
+function decideSegments(divisions){
+    const list = Array.from({ length: divisions }, () => Math.random() < 0.99);
+    return list
+}
 function createRingMesh({
     divisions = 8,
 
@@ -44,9 +74,10 @@ function createRingMesh({
 
     const angleIncrement = (2 * Math.PI) / divisions;
     const segmentGeometrys = [];
-
+    
 
     for (let i = 1; i <= divisions; i++) {
+
         segmentGeometrys.push( createDonutSlice({startAngle: angleIncrement * i, endAngle: angleIncrement * ( i + 1 )}) );
     }
 
