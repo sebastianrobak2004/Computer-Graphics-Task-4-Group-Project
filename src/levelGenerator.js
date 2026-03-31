@@ -3,20 +3,22 @@ import { registerFunctionForSetup, scene, timer } from './sceneManager.js';
 
 const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: false });
 const epsilon = 0.01;
-const enableLogs = false;
+const enableLogs = true;
 
 export const startLevelGeneration = () => {
     const level = new THREE.Group();
     const ring = createRingMesh();
     const scaleVec = new THREE.Vector3;
     
-    const MAX_RINGS = 50;
+    const MAX_RINGS = 16;
     const SPEED = 2;
     let derivedRadius = 1;
 
-    ring.scale.set(epsilon,epsilon,10);
-    level.scale.set(epsilon,epsilon,10);
-    ring.rotateZ(Math.PI/2)
+    ring.scale.set(epsilon,epsilon,1);
+    level.scale.set(1,1,1);
+    
+    level.rotateX(Math.PI/2);
+    level.position.y -= 35;
 
     scene.add(level);
     
@@ -26,7 +28,7 @@ export const startLevelGeneration = () => {
         const multiplier = 1 + growth;
         derivedRadius *= multiplier;
         
-        if (derivedRadius > 1.95){
+        if (derivedRadius >= 2){
             const cur = ring.clone();
             const proceduralList = generateProceduralRing(8);
 
@@ -36,9 +38,11 @@ export const startLevelGeneration = () => {
                     cur.remove(segment);
                 }
             });
+            const overshoot = derivedRadius - 1;
+            //log("overshoot = ", overshoot)
 
             level.add(cur);
-            cur.scale.set(epsilon/level.scale.x, epsilon/level.scale.y , epsilon/level.scale.z);
+            cur.scale.set((epsilon * overshoot)/level.scale.x, (epsilon * overshoot)/level.scale.y , 1);
 
             derivedRadius = 1;
             if (level.children.length > MAX_RINGS ){
@@ -47,8 +51,8 @@ export const startLevelGeneration = () => {
         }
         scaleVec.set(multiplier, multiplier, 1);
         level.scale.multiply(scaleVec);
-        log("Length of rings", level.children.length );
-        log("length of Scene.Children", scene.children.length);
+        //log("Length of rings", level.children.length );
+        //log("length of Scene.Children", scene.children.length);
     }
 
     registerFunctionForSetup(levelUpdate);
