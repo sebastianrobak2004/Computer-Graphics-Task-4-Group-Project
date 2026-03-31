@@ -3,69 +3,64 @@ import { registerFunctionForSetup, scene, timer } from './sceneManager.js';
 
 const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: false });
 const epsilon = 0.01;
+const enableLogs = false;
 
 export const startLevelGeneration = () => {
-    
-    
-       
-   
-    const ring = createRingMesh();
     const level = new THREE.Group();
-    const maximumRings = 10;
+    const ring = createRingMesh();
+    const scaleVec = new THREE.Vector3;
+    
+    const MAX_RINGS = 50;
+    const SPEED = 2;
+    let derivedRadius = 1;
 
     ring.scale.set(epsilon,epsilon,10);
+    level.scale.set(epsilon,epsilon,10);
     ring.rotateZ(Math.PI/2)
 
-
     scene.add(level);
-
     
-    
-    let radius = 1;
-    
-
     const levelUpdate = () => {
-
-
         const delta = timer.getDelta();
-        const m = (0.5 * delta )
-        const mult = 1 + m;
-        radius += m;
-
-        if (radius > 2){
+        const growth = (SPEED * delta )
+        const multiplier = 1 + growth;
+        derivedRadius *= multiplier;
+        
+        if (derivedRadius > 1.95){
             const cur = ring.clone();
-            const randL = decideSegments(8);
+            const proceduralList = generateProceduralRing(8);
 
-            cur.children.forEach((segment, i) => {
-                if (randL[i]) {
+            const segments = [...cur.children]; // remove segments using procedural bool list
+            segments.forEach((segment, i) => {
+                if (proceduralList[i]) {
                     cur.remove(segment);
                 }
             });
 
-
             level.add(cur);
-            radius = 1;
-            if (level.children.length > maximumRings ){
+            cur.scale.set(epsilon/level.scale.x, epsilon/level.scale.y , epsilon/level.scale.z);
+
+            derivedRadius = 1;
+            if (level.children.length > MAX_RINGS ){
                 level.remove(level.children[0]);
             }
         }
-
-        level.children.forEach( curRing =>{
-            curRing.scale.multiply(new THREE.Vector3(mult, mult, 1));
-        })
-
-        
-           
+        scaleVec.set(multiplier, multiplier, 1);
+        level.scale.multiply(scaleVec);
+        log("Length of rings", level.children.length );
+        log("length of Scene.Children", scene.children.length);
     }
 
-    
     registerFunctionForSetup(levelUpdate);
 }
 
-function decideSegments(divisions){
-    const list = Array.from({ length: divisions }, () => Math.random() < 0.99);
+
+function generateProceduralRing(divisions){
+    const list = Array.from({ length: divisions }, () => Math.random() < 0.5);
     return list
 }
+
+
 function createRingMesh({
     divisions = 8,
 
@@ -125,3 +120,11 @@ function createDonutSlice({
 
     return geometry;
 }
+
+function log(string, value){
+    if (!enableLogs) return;
+
+        console.log(`${string} : ${value}`);
+}
+    
+
