@@ -5,10 +5,12 @@ const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: false });
 
 const epsilon = 1;
 const enableLogs = false;
+const ringDisvisions = 8;
+
 
 export const startLevelGeneration = () => {
     const level = new THREE.Group();
-    const ring = createRingMesh();
+    const ring = createRingMesh(ringDisvisions);
     const scaleVec = new THREE.Vector3;
     
     const MAX_RINGS = 10;
@@ -16,6 +18,7 @@ export const startLevelGeneration = () => {
     const SPEED = 1;
 
     let derivedRadius = 1;
+    let currentLevel = null;
 
     ring.scale.set(epsilon,epsilon,1);
     level.scale.set(1,1,1);
@@ -26,6 +29,7 @@ export const startLevelGeneration = () => {
 
     scene.add(level);
     
+    
     const levelUpdate = () => {
         const delta = timer.getDelta();
         const growth = (SPEED * delta )
@@ -34,11 +38,13 @@ export const startLevelGeneration = () => {
         
         if (derivedRadius >= 2){
             const cur = ring.clone();
-            const proceduralList = generateProceduralRing(8);
+            
+            //pass segment number and last ring.
+            currentLevel = generateProceduralRing(ringDisvisions, currentLevel);
 
             const segments = [...cur.children];
             segments.forEach((segment, i) => {
-                if (!proceduralList[i]) {
+                if (!currentLevel[i]) {
                     cur.remove(segment);
                 }
             });
@@ -76,17 +82,16 @@ export const startLevelGeneration = () => {
 }
 
 
-const generateProceduralRing = (divisions) => {
-    const list = Array.from({ length: divisions }, () => Math.random() < 0.30);
+const generateProceduralRing = (divisions, lastList) => {
+    const list = Array.from({ length: divisions }, () => Math.random() < 0.50);
     //const list = [true,true,true,false,false,false,false,false];
     return list
 }
 
 
-const createRingMesh = (divisions = 8 ) => {
+const createRingMesh = (divisions) => {
     const angleIncrement = (2 * Math.PI) / divisions;
     const segmentGeometrys = [];
-    
 
     for (let i = 1; i <= divisions; i++) {
         segmentGeometrys.push(
@@ -102,19 +107,17 @@ const createRingMesh = (divisions = 8 ) => {
         ring.add(mesh);
 
     });
-    
     return ring;
 };
 
-const createDonutSlice = ({
-    innerRadius = 1,
-    outerRadius = 2,
-    startAngle = 0,
-    endAngle = Math.PI / 2,
-    segments = 100,
-    depth = 0.5,          
-    bevelEnabled = false
-} = {}) => {
+const createDonutSlice = ({startAngle, endAngle} = {}) => {
+    
+    const innerRadius = 1;
+    const outerRadius = 2;
+    const segments = 50;
+    const depth = 3;
+    const bevelEnabled = false;
+
     const shape = new THREE.Shape();
 
     shape.absarc(0, 0, outerRadius, startAngle, endAngle, false, segments);
