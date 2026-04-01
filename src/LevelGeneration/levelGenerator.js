@@ -1,5 +1,7 @@
 import * as THREE from 'three';
-import { registerFunctionForSetup, scene, timer } from './sceneManager.js';
+import { registerFunctionForSetup, scene, timer } from '../sceneManager.js';
+
+import { generateMask } from './ringSegmentMask.js';
 
 const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: false });
 
@@ -40,7 +42,7 @@ export const startLevelGeneration = () => {
             const cur = ring.clone();
             
             //pass segment number and last ring.
-            currentLevel = generateProceduralRing(ringDisvisions, currentLevel);
+            currentLevel = generateMask(ringDisvisions, currentLevel);
 
             const segments = [...cur.children];
             segments.forEach((segment, i) => {
@@ -80,14 +82,6 @@ export const startLevelGeneration = () => {
 
     registerFunctionForSetup(levelUpdate);
 }
-
-
-const generateProceduralRing = (divisions, lastList) => {
-    const list = Array.from({ length: divisions }, () => Math.random() < 0.50);
-    //const list = [true,true,true,false,false,false,false,false];
-    return list
-}
-
 
 const createRingMesh = (divisions) => {
     const angleIncrement = (2 * Math.PI) / divisions;

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { setupFloor } from './floor';
 import { move_camera } from './main';
-import { startLevelGeneration } from './levelGenerator';
+import { startLevelGeneration } from './LevelGeneration/levelGenerator';
 
 export let camera;
 export let scene;
