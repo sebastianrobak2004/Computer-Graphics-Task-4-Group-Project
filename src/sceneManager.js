@@ -82,6 +82,7 @@ function update() {
 	for (const fn of updateFunctions) {
         if(typeof fn !== 'function'){
             console.error("Not a function", fn);
+            throw Error("updateFunctions contains non function");
         }
         fn();
 		

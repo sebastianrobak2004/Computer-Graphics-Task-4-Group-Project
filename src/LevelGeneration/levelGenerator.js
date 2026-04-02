@@ -3,16 +3,15 @@ import { registerFunctionForSetup, scene, timer } from '../sceneManager.js';
 
 import { generateMask } from './ringSegmentMask.js';
 
-const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: false });
+const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true});
 
 const epsilon = 1;
-const enableLogs = false;
-const ringDisvisions = 8;
+const ringDivisions = 8;
 
 
 export const startLevelGeneration = () => {
     const level = new THREE.Group();
-    const ring = createRingMesh(ringDisvisions);
+    const ring = createRingMesh(ringDivisions);
     const scaleVec = new THREE.Vector3;
     
     const MAX_RINGS = 10;
@@ -42,7 +41,7 @@ export const startLevelGeneration = () => {
             const cur = ring.clone();
             
             //pass segment number and last ring.
-            currentLevel = generateMask(ringDisvisions, currentLevel);
+            currentLevel = generateMask(ringDivisions, currentLevel);
 
             const segments = [...cur.children];
             segments.forEach((segment, i) => {
@@ -83,12 +82,12 @@ export const startLevelGeneration = () => {
     registerFunctionForSetup(levelUpdate);
 }
 
-const createRingMesh = (divisions) => {
-    const angleIncrement = (2 * Math.PI) / divisions;
-    const segmentGeometrys = [];
+const createRingMesh = (Divisions) => {
+    const angleIncrement = (2 * Math.PI) / Divisions;
+    const segmentGeometries = [];
 
-    for (let i = 1; i <= divisions; i++) {
-        segmentGeometrys.push(
+    for (let i = 1; i <= Divisions; i++) {
+        segmentGeometries.push(
             createDonutSlice({
                 startAngle: angleIncrement * i, 
                 endAngle: angleIncrement * ( i + 1 )
@@ -96,7 +95,7 @@ const createRingMesh = (divisions) => {
     }
 
     const ring = new THREE.Group();
-    segmentGeometrys.forEach( segment => {
+    segmentGeometries.forEach( segment => {
         const mesh = new THREE.Mesh(segment, mat);
         ring.add(mesh);
 

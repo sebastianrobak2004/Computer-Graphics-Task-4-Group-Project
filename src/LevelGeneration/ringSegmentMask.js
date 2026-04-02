@@ -9,12 +9,7 @@ export const generateMask = (segments, lastRing) => {
     return randomMask(0.5);
 }
 
-const randomMask = (chance) => {
-    
-    const list = Array.from({ length: segments }, () => Math.random() < 0.50);
-    return list;
-
-}
+const randomMask = (chance) => Array.from({ length: segments }, () => Math.random() < chance);
 
 const proceduralMask = () => {
     return [];
