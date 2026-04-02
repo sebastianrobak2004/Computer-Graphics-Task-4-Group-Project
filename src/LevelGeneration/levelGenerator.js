@@ -9,6 +9,7 @@ const epsilon = 1;
 const ringDivisions = 8;
 
 
+
 export const startLevelGeneration = () => {
     const level = new THREE.Group();
     const ring = createRingMesh(ringDivisions);
