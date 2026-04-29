@@ -41,7 +41,6 @@ export const startLevelGeneration = () => {
         if (derivedRadius >= 2){
             const cur = ring.clone();
             
-            //pass segment number and last ring.
             currentLevel = generateMask(ringDivisions, currentLevel);
 
             const segments = [...cur.children];
@@ -104,35 +103,90 @@ const createRingMesh = (Divisions) => {
     return ring;
 };
 
-const createDonutSlice = ({startAngle, endAngle} = {}) => {
+const createDonutSlice = ({
+    innerRadius = 1,
+    outerRadius = 2,
+    startAngle = 0,
+    endAngle = Math.PI / 4,
+    radialSegments = 2,
+    angularSegments = 16,
+    depth = 3
+}) => {
+    const positions = [];
+    const indices = [];
+
+    const vertsPerRow = angularSegments + 1;
+    const layerSize = (radialSegments + 1) * vertsPerRow;
+
+    for (let z = 0; z <= 1; z++) {
+        const zPos = z * depth;
+        for (let r = 0; r <= radialSegments; r++) {
+            const radius = THREE.MathUtils.lerp(innerRadius, outerRadius, r / radialSegments);
+            for (let a = 0; a <= angularSegments; a++) {
+                const angle = THREE.MathUtils.lerp(startAngle, endAngle, a / angularSegments);
+                positions.push(Math.cos(angle) * radius, Math.sin(angle) * radius, zPos);
+            }
+        }
+    }
+
+    for (let r = 0; r < radialSegments; r++) {
+        for (let a = 0; a < angularSegments; a++) {
+            const i  = r * vertsPerRow + a;
+            const a0 = i,          a1 = i + 1;
+            const b0 = i + vertsPerRow, b1 = i + vertsPerRow + 1;
+            indices.push(a0, a1, b0);  
+            indices.push(a1, b1, b0);
+        }
+    }
+
     
-    const innerRadius = 1;
-    const outerRadius = 2;
-    const segments = 50;
-    const depth = 3;
-    const bevelEnabled = false;
+    for (let r = 0; r < radialSegments; r++) {
+        for (let a = 0; a < angularSegments; a++) {
+            const i  = layerSize + r * vertsPerRow + a;
+            const a0 = i,          a1 = i + 1;
+            const b0 = i + vertsPerRow, b1 = i + vertsPerRow + 1;
+            indices.push(a0, b0, a1);  
+            indices.push(a1, b0, b1);
+        }
+    }
 
-    const shape = new THREE.Shape();
+    const addSideQuad = (f0, f1, b0, b1) => {
+        indices.push(f0, f1, b0);
+        indices.push(f1, b1, b0);
+    };
 
-    shape.absarc(0, 0, outerRadius, startAngle, endAngle, false, segments);
+    for (let a = 0; a < angularSegments; a++) {
+        const fBase = radialSegments * vertsPerRow;
+        const f0 = fBase + a,             f1 = fBase + a + 1;
+        const b0 = layerSize + fBase + a, b1 = layerSize + fBase + a + 1;
+        addSideQuad(f0, f1, b0, b1);  
+    }
 
-    shape.lineTo(
-        Math.cos(endAngle) * innerRadius,
-        Math.sin(endAngle) * innerRadius
-    );
+    for (let a = 0; a < angularSegments; a++) {
+        const f0 = a,              f1 = a + 1;
+        const b0 = layerSize + a,  b1 = layerSize + a + 1;
+        addSideQuad(f0, b0, f1, b1); 
+    }
 
-    shape.absarc(0, 0, innerRadius, endAngle, startAngle, true, segments);
+    for (let r = 0; r < radialSegments; r++) {
+        const f0 = r * vertsPerRow;
+        const f1 = (r + 1) * vertsPerRow;
+        const b0 = layerSize + f0;
+        const b1 = layerSize + f1;
+        addSideQuad(f0, f1, b0, b1); 
+    }
 
-    shape.lineTo(
-        Math.cos(startAngle) * outerRadius,
-        Math.sin(startAngle) * outerRadius
-    );
+    for (let r = 0; r < radialSegments; r++) {
+        const f0 = r * vertsPerRow + angularSegments;
+        const f1 = (r + 1) * vertsPerRow + angularSegments;
+        const b0 = layerSize + f0;
+        const b1 = layerSize + f1;
+        addSideQuad(f0, b0, f1, b1);  
+    }
 
-    const geometry = new THREE.ExtrudeGeometry(shape, {
-        depth: depth,
-        bevelEnabled: bevelEnabled,
-        curveSegments: segments
-    });
-
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
     return geometry;
-}
+};
