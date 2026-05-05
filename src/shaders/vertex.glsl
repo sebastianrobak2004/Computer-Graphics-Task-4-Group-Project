@@ -1,14 +1,7 @@
-varying vec2 vUv;      
-varying vec3 vNormal;
-uniform float u_time;
-
-
+varying vec3 vPos;
 
 void main() {
-    vec3 pos = position;
-    vUv = uv;
-    
-    
-    
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    vPos = position; // local space position (center = 0,0,0)
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
