@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { registerFunctionForSetup, scene, timer } from '../sceneManager.js';
 
 import { generateMask } from './ringSegmentMask.js';
+import { levelShad } from './ringShader.js';
 
-const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true});
 
 const epsilon = 1;
 const ringDivisions = 8;
@@ -11,7 +11,9 @@ const ringDivisions = 8;
 
 
 export const startLevelGeneration = () => {
+    
     const level = new THREE.Group();
+    
     const ring = createRingMesh(ringDivisions);
     const scaleVec = new THREE.Vector3;
     
@@ -96,7 +98,7 @@ const createRingMesh = (Divisions) => {
 
     const ring = new THREE.Group();
     segmentGeometries.forEach( segment => {
-        const mesh = new THREE.Mesh(segment, mat);
+        const mesh = new THREE.Mesh(segment, levelShad);
         ring.add(mesh);
 
     });
