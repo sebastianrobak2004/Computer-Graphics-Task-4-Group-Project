@@ -1,7 +1,7 @@
-varying vec3 vPos;
+varying vec3 vWorldPos;
 
 void main() {
-    vPos = position; // local space position (center = 0,0,0)
+    vWorldPos = position;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
