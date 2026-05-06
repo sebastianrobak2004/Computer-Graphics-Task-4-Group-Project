@@ -2,20 +2,22 @@ import * as THREE from 'three';
 import { registerFunctionForSetup, scene, timer } from '../sceneManager.js';
 
 import { generateMask } from './ringSegmentMask.js';
+import { levelShad } from './ringShader.js';
 
-const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true});
 
-const epsilon = 1;
+const epsilon = 0.1;
 const ringDivisions = 8;
 
 
 
 export const startLevelGeneration = () => {
+    
     const level = new THREE.Group();
+    
     const ring = createRingMesh(ringDivisions);
     const scaleVec = new THREE.Vector3;
     
-    const MAX_RINGS = 10;
+    const MAX_RINGS = 20;
     const MAX_SCALE = 1024;
     const SPEED = 1;
 
@@ -41,7 +43,6 @@ export const startLevelGeneration = () => {
         if (derivedRadius >= 2){
             const cur = ring.clone();
             
-            //pass segment number and last ring.
             currentLevel = generateMask(ringDivisions, currentLevel);
 
             const segments = [...cur.children];
@@ -97,42 +98,28 @@ const createRingMesh = (Divisions) => {
 
     const ring = new THREE.Group();
     segmentGeometries.forEach( segment => {
-        const mesh = new THREE.Mesh(segment, mat);
+        const mesh = new THREE.Mesh(segment, levelShad);
         ring.add(mesh);
 
     });
     return ring;
 };
 
-const createDonutSlice = ({startAngle, endAngle} = {}) => {
-    
-    const innerRadius = 1;
-    const outerRadius = 2;
-    const segments = 50;
-    const depth = 3;
-    const bevelEnabled = false;
-
+const createDonutSlice = ({
+    innerRadius = 1,
+    outerRadius = 2,
+    startAngle = 0,
+    endAngle = Math.PI / 4,
+    depth = 0.1
+} = {}) => {
     const shape = new THREE.Shape();
+    shape.absarc(0, 0, outerRadius, startAngle, endAngle, false);
+    shape.absarc(0, 0, innerRadius, endAngle, startAngle, true);
+    shape.closePath();
 
-    shape.absarc(0, 0, outerRadius, startAngle, endAngle, false, segments);
-
-    shape.lineTo(
-        Math.cos(endAngle) * innerRadius,
-        Math.sin(endAngle) * innerRadius
-    );
-
-    shape.absarc(0, 0, innerRadius, endAngle, startAngle, true, segments);
-
-    shape.lineTo(
-        Math.cos(startAngle) * outerRadius,
-        Math.sin(startAngle) * outerRadius
-    );
-
-    const geometry = new THREE.ExtrudeGeometry(shape, {
-        depth: depth,
-        bevelEnabled: bevelEnabled,
-        curveSegments: segments
+    return new THREE.ExtrudeGeometry(shape, {
+        depth,
+        bevelEnabled: false,
+        steps: 1,
     });
-
-    return geometry;
-}
+};

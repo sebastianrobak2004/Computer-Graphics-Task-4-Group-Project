@@ -16,7 +16,7 @@ const setupCamera = () => {
 	const cameraFOV = 90;
 	const aspectRatio = window.innerWidth / window.innerHeight;
 	const cameraNearPlane = 0.1;
-	const cameraFarPlane = 1000;
+	const cameraFarPlane = 10000;
 
 	camera = new THREE.PerspectiveCamera(
 		cameraFOV,
