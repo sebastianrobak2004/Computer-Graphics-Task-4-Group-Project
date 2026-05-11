@@ -27,5 +27,6 @@ export function collisionMain() {
 		const distance = closestHit.distance;
 
 		// End game
+		alert('YOU GOT HIT');
 	}
 }
