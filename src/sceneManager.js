@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { setupFloor } from './floor';
-import { move_camera } from './main';
 import { startLevelGeneration } from './LevelGeneration/levelGenerator';
+import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
+import { move } from './movement';
+import { setupPlayer } from './player';
 
 export let camera;
 export let scene;
@@ -25,7 +27,7 @@ const setupCamera = () => {
 		cameraFarPlane,
 	);
 
-	camera.position.set(0, 0, -10);
+	camera.position.set(0, 0, ringGeometryOuterRadius);
 	camera.lookAt(0, -1, 1);
 };
 
@@ -65,10 +67,9 @@ const setupResizeFunction = () => {
 };
 
 export function registerFunctionForSetup(func) {
-    if(typeof func !== 'function'){
-        console.error('Pushed Non-function to function list', func, typeof func);
-    }
-
+	if (typeof func !== 'function') {
+		console.error('Pushed Non-function to function list', func, typeof func);
+	}
 
 	updateFunctions.push(func);
 }
@@ -76,17 +77,15 @@ export function registerFunctionForSetup(func) {
 function update() {
 	timer.update();
 	renderer.render(scene, camera);
-	move_camera();
+	move();
 
 	// Execute any functions registered outside of the sceneManager
 	for (const fn of updateFunctions) {
-        if(typeof fn !== 'function'){
-            console.error("Not a function", fn);
-            throw Error("updateFunctions contains non function");
-        }
-        fn();
-		
-            
+		if (typeof fn !== 'function') {
+			console.error('Not a function', fn);
+			throw Error('updateFunctions contains non function');
+		}
+		fn();
 	}
 }
 
@@ -101,7 +100,9 @@ export function doSetup() {
 
 	// Geometry setup
 	setupFloor();
-    startLevelGeneration();
+	setupMovementPathRing();
+	startLevelGeneration();
+	setupPlayer();
 
 	renderer.setAnimationLoop(update);
 }

@@ -3,6 +3,8 @@ import { registerFunctionForSetup, scene, timer } from './sceneManager.js';
 import fragmentShader from './shaders/fragment.glsl?raw';
 import vertexShader from './shaders/vertex.glsl?raw';
 
+export const floorHeight = -36;
+
 export const setupFloor = () => {
 	const floorGeometry = new THREE.CircleGeometry(1000, 50);
 
@@ -18,8 +20,8 @@ export const setupFloor = () => {
 		fragmentShader: fragmentShader,
 	});
 
-	const floorMesh = new THREE.Mesh(floorGeometry,floorShader);
-    floorMesh.position.y -= 36;
+	const floorMesh = new THREE.Mesh(floorGeometry, floorShader);
+	floorMesh.position.y = floorHeight;
 	floorMesh.rotation.x -= 0.5 * Math.PI;
 
 	scene.add(floorMesh);
