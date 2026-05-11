@@ -4,6 +4,7 @@ import { startLevelGeneration } from './LevelGeneration/levelGenerator';
 import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
 import { move } from './movement';
 import { setupPlayer } from './player';
+import { collisionMain } from './collision';
 
 export let camera;
 export let scene;
@@ -78,6 +79,7 @@ function update() {
 	timer.update();
 	renderer.render(scene, camera);
 	move();
+	collisionMain();
 
 	// Execute any functions registered outside of the sceneManager
 	for (const fn of updateFunctions) {

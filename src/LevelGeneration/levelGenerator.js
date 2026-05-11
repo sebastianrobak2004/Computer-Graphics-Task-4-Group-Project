@@ -4,122 +4,115 @@ import { registerFunctionForSetup, scene, timer } from '../sceneManager.js';
 import { generateMask } from './ringSegmentMask.js';
 import { levelShad } from './ringShader.js';
 
-
 const epsilon = 0.1;
 const ringDivisions = 8;
 
-
+export let level;
 
 export const startLevelGeneration = () => {
-    
-    const level = new THREE.Group();
-    
-    const ring = createRingMesh(ringDivisions);
-    const scaleVec = new THREE.Vector3;
-    
-    const MAX_RINGS = 20;
-    const MAX_SCALE = 1024;
-    const SPEED = 1;
+	level = new THREE.Group();
 
-    let derivedRadius = 1;
-    let currentLevel = null;
+	const ring = createRingMesh(ringDivisions);
+	const scaleVec = new THREE.Vector3();
 
-    ring.scale.set(epsilon,epsilon,1);
-    level.scale.set(1,1,1);
-    level.position.set(0,0,0);
-    
-    level.rotateX(Math.PI/2);
-    level.position.y -= 35;
+	const MAX_RINGS = 20;
+	const MAX_SCALE = 1024;
+	const SPEED = 1;
 
-    scene.add(level);
-    
-    
-    const levelUpdate = () => {
-        const delta = timer.getDelta();
-        const growth = (SPEED * delta )
-        const multiplier = 1 + growth;
-        derivedRadius *= multiplier;
-        
-        if (derivedRadius >= 2){
-            const cur = ring.clone();
-            
-            currentLevel = generateMask(ringDivisions, currentLevel);
+	let derivedRadius = 1;
+	let currentLevel = null;
 
-            const segments = [...cur.children];
-            segments.forEach((segment, i) => {
-                if (!currentLevel[i]) {
-                    cur.remove(segment);
-                }
-            });
-            const adjustment = 2 / derivedRadius;
+	ring.scale.set(epsilon, epsilon, 1);
+	level.scale.set(1, 1, 1);
+	level.position.set(0, 0, 0);
 
+	level.rotateX(Math.PI / 2);
+	level.position.y -= 35;
 
-            level.add(cur);
-            const inverseScale = 1 / level.scale.x;
-            cur.scale.x = (epsilon * adjustment * inverseScale);
-            cur.scale.y = (epsilon * adjustment * inverseScale);
-            
+	scene.add(level);
 
-            derivedRadius -= 1;
-            if (level.children.length > MAX_RINGS ){
-                level.remove(level.children[0]);
-            }
-        }
-        scaleVec.set(multiplier, multiplier, 1);
-        level.scale.multiply(scaleVec);
-        
-        if ( level.scale.x > MAX_SCALE ){
-            const scaleDown = level.scale.x;
+	const levelUpdate = () => {
+		const delta = timer.getDelta();
+		const growth = SPEED * delta;
+		const multiplier = 1 + growth;
+		derivedRadius *= multiplier;
 
-            level.children.forEach( child => {
-                child.scale.multiply(new THREE.Vector3(scaleDown, scaleDown, 1));
-            });
+		if (derivedRadius >= 2) {
+			const cur = ring.clone();
 
-            level.scale.set(1 ,1 ,1 );
+			currentLevel = generateMask(ringDivisions, currentLevel);
 
+			const segments = [...cur.children];
+			segments.forEach((segment, i) => {
+				if (!currentLevel[i]) {
+					cur.remove(segment);
+				}
+			});
+			const adjustment = 2 / derivedRadius;
 
-        }
-    }
+			level.add(cur);
+			const inverseScale = 1 / level.scale.x;
+			cur.scale.x = epsilon * adjustment * inverseScale;
+			cur.scale.y = epsilon * adjustment * inverseScale;
 
-    registerFunctionForSetup(levelUpdate);
-}
+			derivedRadius -= 1;
+			if (level.children.length > MAX_RINGS) {
+				level.remove(level.children[0]);
+			}
+		}
+		scaleVec.set(multiplier, multiplier, 1);
+		level.scale.multiply(scaleVec);
+
+		if (level.scale.x > MAX_SCALE) {
+			const scaleDown = level.scale.x;
+
+			level.children.forEach((child) => {
+				child.scale.multiply(new THREE.Vector3(scaleDown, scaleDown, 1));
+			});
+
+			level.scale.set(1, 1, 1);
+		}
+	};
+
+	registerFunctionForSetup(levelUpdate);
+};
 
 const createRingMesh = (Divisions) => {
-    const angleIncrement = (2 * Math.PI) / Divisions;
-    const segmentGeometries = [];
+	const angleIncrement = (2 * Math.PI) / Divisions;
+	const segmentGeometries = [];
 
-    for (let i = 1; i <= Divisions; i++) {
-        segmentGeometries.push(
-            createDonutSlice({
-                startAngle: angleIncrement * i, 
-                endAngle: angleIncrement * ( i + 1 )
-            }));
-    }
+	for (let i = 1; i <= Divisions; i++) {
+		segmentGeometries.push(
+			createDonutSlice({
+				startAngle: angleIncrement * i,
+				endAngle: angleIncrement * (i + 1),
+			}),
+		);
+	}
 
-    const ring = new THREE.Group();
-    segmentGeometries.forEach( segment => {
-        const mesh = new THREE.Mesh(segment, levelShad);
-        ring.add(mesh);
-
-    });
-    return ring;
+	const ring = new THREE.Group();
+	segmentGeometries.forEach((segment) => {
+		const mesh = new THREE.Mesh(segment, levelShad);
+		ring.add(mesh);
+	});
+	return ring;
 };
 
 const createDonutSlice = ({
-    innerRadius = 1,
-    outerRadius = 2,
-    startAngle = 0,
-    endAngle = Math.PI / 4,
-    depth = 0.1
+	innerRadius = 1,
+	outerRadius = 2,
+	startAngle = 0,
+	endAngle = Math.PI / 4,
+	depth = 0.1,
 } = {}) => {
-    const shape = new THREE.Shape();
-    shape.absarc(0, 0, outerRadius, startAngle, endAngle, false);
-    shape.absarc(0, 0, innerRadius, endAngle, startAngle, true);
-    shape.closePath();
+	const shape = new THREE.Shape();
+	shape.absarc(0, 0, outerRadius, startAngle, endAngle, false);
+	shape.absarc(0, 0, innerRadius, endAngle, startAngle, true);
+	shape.closePath();
 
-    return new THREE.ExtrudeGeometry(shape, {
-        depth,
-        bevelEnabled: false,
-        steps: 1,
-    });
+	return new THREE.ExtrudeGeometry(shape, {
+		depth,
+		bevelEnabled: false,
+		steps: 1,
+	});
 };
