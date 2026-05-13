@@ -3,8 +3,7 @@ varying vec3 vNormal;
 varying vec3 vWorldPos;
 
 void main() {
-
-    float uHeightScale = 0.6;
+    float uHeightScale = 0.8;
     float depth = 0.1;
 
     vec4 worldPos = modelMatrix * vec4(position, 1.0);
@@ -12,16 +11,19 @@ void main() {
 
     float dist = length(worldPos.xz);
 
-    if(position.z < depth) {
+    vec3 displacedNormal = normal;
+
+    if (position.z < depth) {
         worldPos.y += dist * uHeightScale;
+
+        if (dist > 0.0001) {
+            vec2 grad = (worldPos.xz / dist) * uHeightScale;
+            displacedNormal -= vec3(grad.x, 0.0, grad.y);
+        }
     }
 
-    // MODEL SPACE
+    vNormal = normalize(mat3(transpose(inverse(modelMatrix))) * displacedNormal);
     vPos = position;
-    vNormal = normalize(normal);
 
-    gl_Position =
-        projectionMatrix *
-        viewMatrix *
-        worldPos;
+    gl_Position = projectionMatrix * viewMatrix * worldPos;
 }

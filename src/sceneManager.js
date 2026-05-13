@@ -28,7 +28,7 @@ const setupCamera = () => {
 	const cameraFOV = 90;
 	const aspectRatio = window.innerWidth / window.innerHeight;
 	const cameraNearPlane = 0.1;
-	const cameraFarPlane = 10000;
+	const cameraFarPlane = 100000;
 
 	camera = new THREE.PerspectiveCamera(
 		cameraFOV,
@@ -47,9 +47,18 @@ const setupScene = () => {
 
 const setupRenderer = () => {
 	renderer = new THREE.WebGLRenderer();
-    renderTarget = new THREE.WebGLRenderTarget(window.innerHeight, window.outerHeight);
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
+
+    const SSAA = 2.0;
+    
+    renderTarget = new THREE.WebGLRenderTarget(
+        window.innerHeight * SSAA,
+        window.outerHeight * SSAA
+    );
+    renderTarget.texture.minFilter = THREE.LinearFilter;
+    renderTarget.texture.magFilter = THREE.LinearFilter;
+    renderTarget.texture.generateMipmaps = false;
 };
 
 const setupSunlight = () => {
@@ -85,7 +94,13 @@ const setupPostProcessing = () => {
 		uniforms: {
 			tDiffuse: { value: renderTarget.texture },
 			u_texel: { value: new THREE.Vector2(1/window.innerWidth, 1/window.innerHeight) },
+            u_shape: {value: new THREE.Vector2(window.innerWidth, window.innerHeight)},
 		},
+
+        minFilter: THREE.NearestFilter,
+        magFilter: THREE.NearestFilter,
+        generateMipmaps: true,
+
 		vertexShader: `
 			varying vec2 vUv;
 			void main() {

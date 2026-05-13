@@ -20,7 +20,7 @@ export function move() {
 
 	const newPos = new THREE.Vector3(
 		ringGeometryOuterRadius * Math.cos(playerAngle),
-		-20,
+		-21,
 		ringGeometryOuterRadius * Math.sin(playerAngle),
 	);
 

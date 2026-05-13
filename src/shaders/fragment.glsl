@@ -6,46 +6,44 @@ uniform float u_time;
 #define PI 3.141593
 
 
-
-//voronoi noise by Max bittker  https://github.com/MaxBittker/glsl-voronoi-noise/blob/master/2d.glsl
-const mat2 myt = mat2(.12121212, .13131313, -.13131313, .12121212);
-const vec2 mys = vec2(1e4, 1e6);
-
-vec2 rhash(vec2 uv) {
-  uv *= myt;
-  uv *= mys;
-  return fract(fract(uv / mys) * uv);
+// voronoi noise based on @patriciogv in https://thebookofshaders.com/edit.php#12/vorono-01.frag
+vec2 random2(vec2 p){
+    return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
 }
 
-vec3 hash(vec3 p) {
-  return fract(sin(vec3(dot(p, vec3(1.0, 57.0, 113.0)),
-                        dot(p, vec3(57.0, 113.0, 1.0)),
-                        dot(p, vec3(113.0, 1.0, 57.0)))) *
-               43758.5453);
-}
+vec2 voronoiFlat(vec2 p){
+    
+    vec2 pi = floor(p);
 
-float voronoi2d(const in vec2 point) {
-  vec2 p = floor(point);
-  vec2 f = fract(point);
-  float res = 0.0;
-  for (int j = -1; j <= 1; j++) {
-    for (int i = -1; i <= 1; i++) {
-      vec2 b = vec2(i, j);
-      vec2 r = vec2(b) - f + rhash(p + b);
-      res += 1. / pow(dot(r, r), 8.);
+    vec2 pf = fract(p);
+
+    float m_dist = 10.0;
+    vec2 m_point;
+
+    for (int j=-1; j<=1; j++ ) {
+        for (int i=-1; i<=1; i++ ) {
+            vec2 neighbor = vec2(float(i),float(j));
+            vec2 point = random2(pi+ neighbor);
+            point = 0.5 + 0.5*sin(6.2831*point);
+            vec2 diff = neighbor + point - pf;
+            float dist = length(diff);
+
+            if( dist < m_dist ) {
+                m_dist = dist;
+                m_point = point;
+            }
+        }
     }
-  }
-  return pow(1. / res, 0.0625);
-}
 
-#pragma glslify: export(voronoi2d)
+    return vec2(m_point.x/2.0+m_point.y/2.0, 0.0);
+}
 
 void main() {
     
     
     vec2 pos = vWorldPos.xz;
 
-    float noise = voronoi2d(pos * 0.1);
+    float noise = voronoiFlat(pos * 0.1).x;
 
 
     float ndx = dFdx(noise);
@@ -56,7 +54,7 @@ void main() {
 
     vec3 normal = normalize(vNormal + bump * 2.0);    
         
-    pos += noise * 2.5;
+    //pos += noise * 2.5;
 
     float a = atan(pos.x, pos.y);
     float dst = length(pos);
@@ -102,7 +100,7 @@ void main() {
     vec3 color = vec3(0.0, 0.0, 0.0);
 
 
-    color += vec3(1.0) * fresnel;
+    color += vec3(0.1) * fresnel * 0.6;
 
 
 
