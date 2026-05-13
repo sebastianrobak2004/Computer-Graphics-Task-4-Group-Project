@@ -44,7 +44,7 @@ export const startLevelGeneration = () => {
 
 			const segments = [...cur.children];
 			segments.forEach((segment, i) => {
-				if (!currentLevel[i]) {
+				if (currentLevel[i]) {
 					cur.remove(segment);
 				}
 			});

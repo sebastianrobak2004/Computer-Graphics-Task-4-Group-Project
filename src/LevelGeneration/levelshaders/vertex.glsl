@@ -3,7 +3,7 @@ varying vec3 vNormal;
 varying vec3 vWorldPos;
 
 void main() {
-    float uHeightScale = 0.8;
+    float uHeightScale = 0.785;
     float depth = 0.1;
 
     vec4 worldPos = modelMatrix * vec4(position, 1.0);
