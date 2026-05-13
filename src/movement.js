@@ -5,7 +5,7 @@ import { camera } from './sceneManager';
 import { ringGeometryOuterRadius } from './ring';
 
 // Constants
-const SPEED = 0.03;
+const SPEED = 0.003;
 
 let playerAngle = 0;
 
@@ -20,7 +20,7 @@ export function move() {
 
 	const newPos = new THREE.Vector3(
 		ringGeometryOuterRadius * Math.cos(playerAngle),
-		0,
+		-21,
 		ringGeometryOuterRadius * Math.sin(playerAngle),
 	);
 
@@ -34,5 +34,5 @@ export function move() {
 		player.position.z = newPos.z;
 	}
 
-	camera.lookAt(0, 0, 0);
+	camera.lookAt(0, -25, 0);
 }
