@@ -4,12 +4,22 @@ import { startLevelGeneration } from './LevelGeneration/levelGenerator';
 import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
 import { move } from './movement';
 import { setupPlayer } from './player';
+import postProcessingFragment from './shaders/postFrag.glsl?raw';
 
 export let camera;
 export let scene;
 export let renderer;
 export let sunlight;
 export let timer;
+
+
+// post processing
+export let renderTarget;
+export let postCamera;
+export let postScene;
+export let postMaterial;
+export let postQuad;
+
 
 const updateFunctions = [];
 
@@ -37,6 +47,7 @@ const setupScene = () => {
 
 const setupRenderer = () => {
 	renderer = new THREE.WebGLRenderer();
+    renderTarget = new THREE.WebGLRenderTarget(window.innerHeight, window.outerHeight);
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 };
@@ -66,6 +77,34 @@ const setupResizeFunction = () => {
 	window.addEventListener('resize', OnResize);
 };
 
+const setupPostProcessing = () => {
+    postScene = new THREE.Scene();
+    postCamera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+
+    postMaterial = new THREE.ShaderMaterial({
+		uniforms: {
+			tDiffuse: { value: renderTarget.texture },
+			u_texel: { value: new THREE.Vector2(1/window.innerWidth, 1/window.innerHeight) },
+		},
+		vertexShader: `
+			varying vec2 vUv;
+			void main() {
+				vUv = uv;
+				gl_Position = vec4(position, 1.0);
+			}
+		`,
+		fragmentShader: postProcessingFragment
+	});
+
+    postQuad = new THREE.Mesh(
+		new THREE.PlaneGeometry(2, 2),
+		postMaterial
+	);
+
+	postScene.add(postQuad);
+}
+
+
 export function registerFunctionForSetup(func) {
 	if (typeof func !== 'function') {
 		console.error('Pushed Non-function to function list', func, typeof func);
@@ -76,7 +115,14 @@ export function registerFunctionForSetup(func) {
 
 function update() {
 	timer.update();
+
+
+    renderer.setRenderTarget(renderTarget);
 	renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+
+    renderer.render(postScene, postCamera);
+
 	move();
 
 	// Execute any functions registered outside of the sceneManager
@@ -97,6 +143,7 @@ export function doSetup() {
 	setupSunlight();
 	setupTimer();
 	setupResizeFunction();
+    setupPostProcessing();
 
 	// Geometry setup
 	setupFloor();
