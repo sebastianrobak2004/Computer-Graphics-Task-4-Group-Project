@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { registerFunctionForSetup, scene, timer } from './sceneManager.js';
+import { registerFunctionForSetup, scene, timer, camera } from './sceneManager.js';
 import fragmentShader from './shaders/fragment.glsl?raw';
 import vertexShader from './shaders/vertex.glsl?raw';
 
-export const floorHeight = -36;
+export const floorHeight = -35.1;
 
 export const setupFloor = () => {
 	const floorGeometry = new THREE.CircleGeometry(1000, 50);
