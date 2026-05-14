@@ -40,7 +40,7 @@ void main() {
 
     float fresnel = pow(1.0 - max(dot(normal, V), 0.0), 2.0);
 
-    vec3 color = vec3(0.1,0.0,0.0) * (fresnel) * 0.8;
+    vec3 color = vec3(0.1,0.0,0.0) * (fresnel) * 3.0;
 
     gl_FragColor = vec4(color, 1.0);
 }

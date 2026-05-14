@@ -17,7 +17,7 @@ export const startLevelGeneration = () => {
 
 	const MAX_RINGS = 20;
 	const MAX_SCALE = 1024;
-	const SPEED = 1;
+	const SPEED = 1.0;
 
 	let derivedRadius = 1;
 	let currentLevel = null;

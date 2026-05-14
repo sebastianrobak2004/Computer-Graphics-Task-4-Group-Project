@@ -5,7 +5,7 @@ import { camera } from './sceneManager';
 import { ringGeometryOuterRadius } from './ring';
 
 // Constants
-const SPEED = 0.01;
+const SPEED = 0.02;
 
 let playerAngle = 0;
 
