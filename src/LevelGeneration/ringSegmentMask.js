@@ -12,42 +12,42 @@ export const generateMask = (segments, lastRing) => {
 const randomMask = (chance) => Array.from({ length: segments }, () => Math.random() < chance);
 
 const mod = (n, m) => ((n % m) + m) % m;
-const randBool = () => Math.random() < 0.5 ? true : false;
+
 
 const proceduralMask = () => {
-    if(lastR == null){
-        lastR = [false,false,false,false,false,false,true,true];
-        console.log(lastR);
+    if (lastR == null) {
+        lastR = [false, false, false, false, false, false, true, true];
     }
 
-    let nextR = [false,false,false,false,false,false,false,false];
+    const reversed = Math.random() < 0.5;
+    const working = reversed ? [...lastR].reverse() : [...lastR];
 
-    let first = true;
-    //const dir = Math.random() < 0.5 ? 1 : -1;
+    const len = working.length;
+    let nextR = new Array(len).fill(false);
 
-    for (let i = 1; i < lastR.length; i += 1){
-        const cur = lastR[i];
-        const prev = lastR[mod(i + 1, lastR.length)];
-        const next = lastR[mod(i - 1, lastR.length)];
-
-        if(!cur){
-            if(!first) first = true;
-            continue;
-        }
-
-        if(first){
-            nextR[i] = true;
-            first = false;
-        }else{
-            nextR[i] = randBool();
-        }
-
-        if(nextR[i]){
-            if(!prev) nextR[mod(i + 1, lastR.length)] = randBool();
-            if(!next) nextR[mod(i - 1, lastR.length)] = randBool();
+    for (let i = 0; i < len; i++) {
+        if (!working[i]) continue;
+        const prevAlive = working[mod(i - 1, len)];
+        const nextAlive = working[mod(i + 1, len)];
+        const neighborCount = (prevAlive ? 1 : 0) + (nextAlive ? 1 : 0);
+        const survivalChance = [1.0, 0.75, 0.35][neighborCount];
+        nextR[i] = Math.random() < survivalChance;
+        if (nextR[i]) {
+            const spreadChance = neighborCount === 1 ? 0.65 : 0.3;
+            if (!working[mod(i - 1, len)] && !nextR[mod(i - 1, len)]) {
+                nextR[mod(i - 1, len)] = Math.random() < spreadChance;
+            }
+            if (!working[mod(i + 1, len)] && !nextR[mod(i + 1, len)]) {
+                nextR[mod(i + 1, len)] = Math.random() < spreadChance;
+            }
         }
     }
-    
-    console.log(nextR);
-    return nextR;
-}
+
+    if (!nextR.some(Boolean)) {
+        const aliveLast = working.map((v, i) => v ? i : -1).filter(i => i !== -1);
+        nextR[aliveLast[Math.floor(Math.random() * aliveLast.length)]] = true;
+    }
+
+    lastR = reversed ? nextR.reverse() : nextR;
+    return lastR;
+};

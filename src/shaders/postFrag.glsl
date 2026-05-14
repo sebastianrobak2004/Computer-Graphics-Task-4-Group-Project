@@ -6,7 +6,7 @@ uniform float u_brightness;
 varying vec2 vUv;
 
 
-#define SIG 0.5
+#define SIG 0.6
 
 // from https://mini.gmshaders.com/p/gamma
 //Decode sRGB to linear
@@ -63,7 +63,7 @@ vec4 sampleSSAA(sampler2D tex, vec2 p){
         }
     }
 
-    return color1 / 7.0;
+    return color1 / 2.0;
 }
 
 vec3 checkHDR(vec3 c){
@@ -75,10 +75,10 @@ void main() {
 
 
     vec4 color = sampleSSAA(tDiffuse, vUv); 
-    color *= 30.0;
     color.xyz = Tonemap_tanh(color.xyz);
     color.xyz = SRGB_encode(color.xyz);
-    color *= 0.85;
+    //color *= 50.0;
+    //color *= 0.85;
     
     
    
