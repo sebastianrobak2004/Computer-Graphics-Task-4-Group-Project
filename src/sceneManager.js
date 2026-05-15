@@ -93,7 +93,7 @@ const setupRenderer = () => {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 
-	const SSAA = 2.0;
+	const SSAA = 4.0;
 
 	renderTarget = new THREE.WebGLRenderTarget(
 		window.innerHeight * SSAA,

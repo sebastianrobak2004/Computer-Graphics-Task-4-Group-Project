@@ -6,7 +6,7 @@ uniform float u_brightness;
 varying vec2 vUv;
 
 
-#define SIG 0.6
+#define SIG 0.5
 
 // from https://mini.gmshaders.com/p/gamma
 //Decode sRGB to linear
@@ -51,6 +51,8 @@ vec4 sampleSSAA(sampler2D tex, vec2 p){
     
     float dx = 1.0/u_shape.x;
     float dy = 1.0/u_shape.y;
+
+    float c = 0.;
     
     int sze = 3;
     for (int y=-sze; y<sze+1; y++)
@@ -60,10 +62,11 @@ vec4 sampleSSAA(sampler2D tex, vec2 p){
             float k = gaussian(float(x), sigma) * gaussian(float(y), sigma);
             vec2 dpos = vec2(float(x)*dx, float(y)*dy);
             color1 += texture2D(tex, pos+dpos) * k;
+            c += k;
         }
     }
 
-    return color1 / 2.0;
+    return color1 / c;
 }
 
 vec3 checkHDR(vec3 c){
@@ -75,6 +78,8 @@ void main() {
 
 
     vec4 color = sampleSSAA(tDiffuse, vUv); 
+    //color *= 20.;
+    
     color.xyz = Tonemap_tanh(color.xyz);
     color.xyz = SRGB_encode(color.xyz);
     //color *= 50.0;
