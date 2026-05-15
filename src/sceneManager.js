@@ -13,18 +13,58 @@ import postProcessingFragment from './shaders/postFrag.glsl?raw';
 
 export let camera;
 export let scene;
-export let renderer;
-export let sunlight;
 export let timer;
+let renderer;
+let sunlight;
 
 // post processing
-export let renderTarget;
-export let postCamera;
-export let postScene;
-export let postMaterial;
-export let postQuad;
+let renderTarget;
+let postCamera;
+let postScene;
+let postMaterial;
+let postQuad;
 
 let isScenePaused = false;
+
+export function doSetup() {
+	// Scene setup
+	setupCamera();
+	setupScene();
+	setupRenderer();
+	setupSunlight();
+	setupTimer();
+	setupResizeFunction();
+	setupPostProcessing();
+
+	// Geometry setup
+	setupFloor();
+	setupMovementPathRing();
+	startLevelGeneration();
+	setupPlayer();
+
+	initializeGame();
+
+	renderer.setAnimationLoop(update);
+}
+
+function update() {
+	if (!isScenePaused) {
+		timer.update();
+
+		doMove();
+		collisionMain();
+		levelUpdate();
+		updateFloorShaders();
+	}
+
+	renderer.setRenderTarget(renderTarget);
+	renderer.render(scene, camera);
+	renderer.setRenderTarget(null);
+
+	renderer.render(postScene, postCamera);
+
+	manageGame();
+}
 
 const setupCamera = () => {
 	// Camera constants
@@ -123,54 +163,7 @@ const setupPostProcessing = () => {
 	postScene.add(postQuad);
 };
 
-function update() {
-	if (!isScenePaused) {
-		timer.update();
-
-		doMove();
-		collisionMain();
-		levelUpdate();
-		updateFloorShaders();
-	}
-
-	renderer.setRenderTarget(renderTarget);
-	renderer.render(scene, camera);
-	renderer.setRenderTarget(null);
-
-	renderer.render(postScene, postCamera);
-
-	manageGame();
-}
-
-export function doSetup() {
-	// Scene setup
-	setupCamera();
-	setupScene();
-	setupRenderer();
-	setupSunlight();
-	setupTimer();
-	setupResizeFunction();
-	setupPostProcessing();
-
-	// Geometry setup
-	setupFloor();
-	setupMovementPathRing();
-	startLevelGeneration();
-	setupPlayer();
-
-	initializeGame();
-
-	renderer.setAnimationLoop(update);
-}
-
-export function pauseScene() {
-	isScenePaused = true;
-}
-
-export function resumeScene() {
-	isScenePaused = false;
-}
-
-export function isSceneRunning() {
-	return !isScenePaused;
-}
+// Helper functions
+export const pauseScene = () => (isScenePaused = true);
+export const resumeScene = () => (isScenePaused = false);
+export const isSceneRunning = () => !isScenePaused;
