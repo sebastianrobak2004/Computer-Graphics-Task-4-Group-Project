@@ -1,9 +1,10 @@
 import * as THREE from 'three';
-import { registerFunctionForSetup, scene, timer, camera } from './sceneManager.js';
+import { scene, timer } from './sceneManager.js';
 import fragmentShader from './shaders/fragment.glsl?raw';
 import vertexShader from './shaders/vertex.glsl?raw';
 
-export const floorHeight = -35.1;
+export const floorHeight = -36;
+export let updateFloorShaders = () => {}; // Will be set by setupFloor
 
 export const setupFloor = () => {
 	const floorGeometry = new THREE.CircleGeometry(1000, 50);
@@ -26,9 +27,7 @@ export const setupFloor = () => {
 
 	scene.add(floorMesh);
 
-	const updateFloorShaders = () => {
+	updateFloorShaders = () => {
 		floorShader.uniforms.u_time.value = timer.getElapsed();
 	};
-
-	registerFunctionForSetup(updateFloorShaders);
 };

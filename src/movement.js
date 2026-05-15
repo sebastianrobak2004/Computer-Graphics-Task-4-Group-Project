@@ -5,11 +5,11 @@ import { camera } from './sceneManager';
 import { ringGeometryOuterRadius } from './ring';
 
 // Constants
-const SPEED = 0.02;
+const SPEED = 0.03;
 
 let playerAngle = 0;
 
-export function move() {
+export function doMove() {
 	if (movementState.isMovingLeft) {
 		playerAngle += SPEED;
 	}

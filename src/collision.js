@@ -5,6 +5,12 @@ import { player } from './player';
 const raycaster = new THREE.Raycaster();
 const rayDirection = new THREE.Vector3();
 
+export let isHit = false;
+
+export function resetCollision() {
+	isHit = false;
+}
+
 export function collisionMain() {
 	const rayOrigin = player.position.clone();
 
@@ -21,12 +27,9 @@ export function collisionMain() {
 
 	const intersections = raycaster.intersectObjects(segments, true); // Make sure to check recursively
 
-	// If there is a collision
-	if (intersections.length > 0) {
-		const closestHit = intersections[0];
-		const distance = closestHit.distance;
+	isHit = intersections.length > 0;
 
-		// End game
-		//alert('YOU GOT HIT');
+	if (isHit) {
+		console.log('HIT');
 	}
 }

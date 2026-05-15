@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { registerFunctionForSetup, scene, timer } from '../sceneManager.js';
+import { scene, timer } from '../sceneManager.js';
 
 import { generateMask } from './ringSegmentMask.js';
 import { levelShad } from './ringShader.js';
@@ -8,6 +8,7 @@ const epsilon = 0.1;
 const ringDivisions = 8;
 
 export let level;
+export let levelUpdate = () => {}; // Will be set by startLevelGeneration
 
 export const startLevelGeneration = () => {
 	level = new THREE.Group();
@@ -31,7 +32,7 @@ export const startLevelGeneration = () => {
 
 	scene.add(level);
 
-	const levelUpdate = () => {
+	levelUpdate = () => {
 		const delta = timer.getDelta();
 		const growth = SPEED * delta;
 		const multiplier = 1 + growth;
@@ -73,8 +74,6 @@ export const startLevelGeneration = () => {
 			level.scale.set(1, 1, 1);
 		}
 	};
-
-	registerFunctionForSetup(levelUpdate);
 };
 
 const createRingMesh = (Divisions) => {

@@ -1,20 +1,19 @@
 import * as THREE from 'three';
-import { setupFloor } from './floor';
 import { startLevelGeneration } from './LevelGeneration/levelGenerator';
-import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
-import { move } from './movement';
 import { setupPlayer } from './player';
-
-import postProcessingFragment from './shaders/postFrag.glsl?raw';
+import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
 import { collisionMain } from './collision';
-
+import { setupFloor, updateFloorShaders } from './floor';
+import { manageGame } from './gameManager';
+import { levelUpdate } from './LevelGeneration/levelGenerator';
+import { doMove } from './movement';
+import postProcessingFragment from './shaders/postFrag.glsl?raw';
 
 export let camera;
 export let scene;
 export let renderer;
 export let sunlight;
 export let timer;
-
 
 // post processing
 export let renderTarget;
@@ -23,8 +22,7 @@ export let postScene;
 export let postMaterial;
 export let postQuad;
 
-
-const updateFunctions = [];
+let isScenePaused = false;
 
 const setupCamera = () => {
 	// Camera constants
@@ -53,15 +51,15 @@ const setupRenderer = () => {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 
-    const SSAA = 2.0;
-    
-    renderTarget = new THREE.WebGLRenderTarget(
-        window.innerHeight * SSAA,
-        window.outerHeight * SSAA
-    );
-    renderTarget.texture.minFilter = THREE.LinearFilter;
-    renderTarget.texture.magFilter = THREE.LinearFilter;
-    renderTarget.texture.generateMipmaps = false;
+	const SSAA = 2.0;
+
+	renderTarget = new THREE.WebGLRenderTarget(
+		window.innerHeight * SSAA,
+		window.outerHeight * SSAA,
+	);
+	renderTarget.texture.minFilter = THREE.LinearFilter;
+	renderTarget.texture.magFilter = THREE.LinearFilter;
+	renderTarget.texture.generateMipmaps = false;
 };
 
 const setupSunlight = () => {
@@ -90,19 +88,23 @@ const setupResizeFunction = () => {
 };
 
 const setupPostProcessing = () => {
-    postScene = new THREE.Scene();
-    postCamera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+	postScene = new THREE.Scene();
+	postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    postMaterial = new THREE.ShaderMaterial({
+	postMaterial = new THREE.ShaderMaterial({
 		uniforms: {
 			tDiffuse: { value: renderTarget.texture },
-			u_texel: { value: new THREE.Vector2(1/window.innerWidth, 1/window.innerHeight) },
-            u_shape: {value: new THREE.Vector2(window.innerWidth, window.innerHeight)},
+			u_texel: {
+				value: new THREE.Vector2(1 / window.innerWidth, 1 / window.innerHeight),
+			},
+			u_shape: {
+				value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+			},
 		},
 
-        minFilter: THREE.NearestFilter,
-        magFilter: THREE.NearestFilter,
-        generateMipmaps: true,
+		minFilter: THREE.NearestFilter,
+		magFilter: THREE.NearestFilter,
+		generateMipmaps: true,
 
 		vertexShader: `
 			varying vec2 vUv;
@@ -111,47 +113,31 @@ const setupPostProcessing = () => {
 				gl_Position = vec4(position, 1.0);
 			}
 		`,
-		fragmentShader: postProcessingFragment
+		fragmentShader: postProcessingFragment,
 	});
 
-    postQuad = new THREE.Mesh(
-		new THREE.PlaneGeometry(2, 2),
-		postMaterial
-	);
+	postQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMaterial);
 
 	postScene.add(postQuad);
-}
-
-
-export function registerFunctionForSetup(func) {
-	if (typeof func !== 'function') {
-		console.error('Pushed Non-function to function list', func, typeof func);
-	}
-
-	updateFunctions.push(func);
-}
+};
 
 function update() {
-	timer.update();
+	if (!isScenePaused) {
+		timer.update();
 
-
-    renderer.setRenderTarget(renderTarget);
-	renderer.render(scene, camera);
-    renderer.setRenderTarget(null);
-
-    renderer.render(postScene, postCamera);
-
-	move();
-	collisionMain();
-
-	// Execute any functions registered outside of the sceneManager
-	for (const fn of updateFunctions) {
-		if (typeof fn !== 'function') {
-			console.error('Not a function', fn);
-			throw Error('updateFunctions contains non function');
-		}
-		fn();
+		doMove();
+		collisionMain();
+		levelUpdate();
+		updateFloorShaders();
 	}
+
+	renderer.setRenderTarget(renderTarget);
+	renderer.render(scene, camera);
+	renderer.setRenderTarget(null);
+
+	renderer.render(postScene, postCamera);
+
+	manageGame();
 }
 
 export function doSetup() {
@@ -162,7 +148,7 @@ export function doSetup() {
 	setupSunlight();
 	setupTimer();
 	setupResizeFunction();
-    setupPostProcessing();
+	setupPostProcessing();
 
 	// Geometry setup
 	setupFloor();
@@ -171,4 +157,16 @@ export function doSetup() {
 	setupPlayer();
 
 	renderer.setAnimationLoop(update);
+}
+
+export function pauseScene() {
+	isScenePaused = true;
+}
+
+export function resumeScene() {
+	isScenePaused = false;
+}
+
+export function isSceneRunning() {
+	return !isScenePaused;
 }
