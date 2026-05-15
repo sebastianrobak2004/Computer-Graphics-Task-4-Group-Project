@@ -17,7 +17,6 @@ export const setupMovementPathRing = () => {
 	);
 	const ringMaterial = new THREE.MeshBasicMaterial({
 		color: new THREE.Color(1, 0.5, 1),
-		wireframe: true,
 	});
 
 	const movementPathRing = new THREE.Mesh(ringGeometry, ringMaterial);

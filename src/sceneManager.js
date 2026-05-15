@@ -1,12 +1,14 @@
 import * as THREE from 'three';
-import { startLevelGeneration } from './LevelGeneration/levelGenerator';
-import { setupPlayer } from './player';
-import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
 import { collisionMain } from './collision';
 import { setupFloor, updateFloorShaders } from './floor';
-import { manageGame } from './gameManager';
-import { levelUpdate } from './LevelGeneration/levelGenerator';
+import { initializeGame, manageGame } from './gameManager';
+import {
+	levelUpdate,
+	startLevelGeneration,
+} from './LevelGeneration/levelGenerator';
 import { doMove } from './movement';
+import { setupPlayer } from './player';
+import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
 import postProcessingFragment from './shaders/postFrag.glsl?raw';
 
 export let camera;
