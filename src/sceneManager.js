@@ -156,6 +156,8 @@ export function doSetup() {
 	startLevelGeneration();
 	setupPlayer();
 
+	initializeGame();
+
 	renderer.setAnimationLoop(update);
 }
 
