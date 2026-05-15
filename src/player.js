@@ -16,7 +16,7 @@ export const setupPlayer = () => {
 };
 
 const setupPlayerCapsule = () => {
-	const playerCapsuleRadius = 3;
+	const playerCapsuleRadius = 10;
 	const playerCapsuleHeight = 10;
 	const playerCapsuleCapSegments = 4;
 	const playerCapsuleRadialSegments = 12;
