@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { collisionMain } from './collision';
 import { setupFloor, updateFloorShaders } from './floor';
-import { initializeGame, manageGame } from './gameManager';
+import { initializeGame, manageGame, gameData } from './gameManager';
 import {
 	levelUpdate,
 	startLevelGeneration,
@@ -10,6 +10,9 @@ import { doMove } from './movement';
 import { setupPlayer } from './player';
 import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
 import postProcessingFragment from './shaders/postFrag.glsl?raw';
+
+const BASE_FOV = 90;
+const SPRINT_FOV_INCREASE = 15;
 
 export let camera;
 export let scene;
@@ -55,6 +58,13 @@ function update() {
 		collisionMain();
 		levelUpdate();
 		updateFloorShaders();
+
+		if (gameData.isSprintingActive) {
+			camera.fov = BASE_FOV + SPRINT_FOV_INCREASE;
+		} else {
+			camera.fov = BASE_FOV;
+		}
+		camera.updateProjectionMatrix();
 	}
 
 	renderer.setRenderTarget(renderTarget);
@@ -68,13 +78,12 @@ function update() {
 
 const setupCamera = () => {
 	// Camera constants
-	const cameraFOV = 90;
 	const aspectRatio = window.innerWidth / window.innerHeight;
 	const cameraNearPlane = 0.1;
 	const cameraFarPlane = 100000;
 
 	camera = new THREE.PerspectiveCamera(
-		cameraFOV,
+		BASE_FOV,
 		aspectRatio,
 		cameraNearPlane,
 		cameraFarPlane,

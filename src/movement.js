@@ -3,19 +3,32 @@ import { movementState } from './controls';
 import { player } from './player';
 import { camera } from './sceneManager';
 import { ringGeometryOuterRadius } from './ring';
+import { gameData, startSprint, stopSprint } from './gameManager';
 
 // Constants
 const SPEED = 0.03;
+const SPRINT_SPEED_MULTIPLIER = 1.5;
 
 let playerAngle = 0;
 
 export function doMove() {
+	if (movementState.isSprintingPressed) {
+		startSprint();
+	} else {
+		stopSprint();
+	}
+
+	let effectiveSpeed = SPEED;
+	if (gameData.isSprintingActive) {
+		effectiveSpeed = SPEED * SPRINT_SPEED_MULTIPLIER;
+	}
+
 	if (movementState.isMovingLeft) {
-		playerAngle += SPEED;
+		playerAngle += effectiveSpeed;
 	}
 
 	if (movementState.isMovingRight) {
-		playerAngle -= SPEED;
+		playerAngle -= effectiveSpeed;
 	}
 
 	const newPos = new THREE.Vector3(

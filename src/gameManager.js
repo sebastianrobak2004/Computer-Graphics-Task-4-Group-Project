@@ -10,28 +10,36 @@ export const GameState = {
 	GAMEOVER: 'gameover',
 };
 
-// Game data tracking
+const MAX_STAMINA = 100;
+const STAMINA_DEPLETION_PER_FRAME = 1;
+const STAMINA_RECOVERY_PER_FRAME = 0.5;
+const STAMINA_RECOVERY_THRESHOLD = 25; // 25% of max stamina
+
 export const gameData = {
 	score: 0,
 	startTime: null,
 	currentTime: 0,
 	elapsedSeconds: 0,
+	currentStamina: MAX_STAMINA,
+	isSprintingActive: false,
+	canSprint: true,
 };
 
 let currentGameState = GameState.PLAYING;
 let gameOverTime = null;
 
-// Initialize game
 export function initializeGame() {
 	currentGameState = GameState.PLAYING;
 	gameData.score = 0;
 	gameData.startTime = Date.now();
 	gameData.currentTime = 0;
 	gameData.elapsedSeconds = 0;
+	gameData.currentStamina = MAX_STAMINA;
+	gameData.isSprintingActive = false;
+	gameData.canSprint = true;
 	gameOverTime = null;
 }
 
-// State management
 export function getCurrentGameState() {
 	return currentGameState;
 }
@@ -51,14 +59,16 @@ export function setState(newState) {
 	}
 }
 
-// Update game time and check collisions
 export function manageGame() {
 	if (currentGameState === GameState.PLAYING) {
 		// Update elapsed time
 		gameData.currentTime = Date.now() - gameData.startTime;
 		gameData.elapsedSeconds = Math.floor(gameData.currentTime / 1000);
 
-		// Check for collision (game over)
+		updateStamina();
+
+		updateStaminaBar();
+
 		if (isHit) {
 			setState(GameState.GAMEOVER);
 		}
@@ -72,12 +82,10 @@ export function addScore(points) {
 	}
 }
 
-// UI Overlay management
 function showGameOverOverlay() {
 	const overlay = document.getElementById('gameOverOverlay');
 	if (!overlay) return;
 
-	// Update game data display
 	document.getElementById('finalScore').textContent = gameData.score;
 	document.getElementById('survivalTime').textContent = gameData.elapsedSeconds;
 
@@ -91,27 +99,65 @@ function hideGameOverOverlay() {
 	}
 }
 
-// Restart game
 export function restartGame() {
-	// Clear old level from scene
 	if (level && level.parent) {
 		scene.remove(level);
 	}
 
-	// Regenerate level
 	startLevelGeneration();
 
-	// Reset collision state
 	resetCollision();
-
-	// Reset player position
 	if (player) {
 		player.position.set(0, 0, ringGeometryOuterRadius);
 	}
 
-	// Reset game state and data
 	initializeGame();
 	hideGameOverOverlay();
 	resumeScene();
 	setState(GameState.PLAYING);
+}
+
+export function updateStamina() {
+	if (currentGameState !== GameState.PLAYING) return;
+
+	if (gameData.isSprintingActive) {
+		gameData.currentStamina -= STAMINA_DEPLETION_PER_FRAME;
+		if (gameData.currentStamina <= 0) {
+			gameData.currentStamina = 0;
+			gameData.isSprintingActive = false;
+		}
+	} else {
+		gameData.currentStamina += STAMINA_RECOVERY_PER_FRAME;
+		if (gameData.currentStamina > MAX_STAMINA) {
+			gameData.currentStamina = MAX_STAMINA;
+		}
+	}
+
+	gameData.canSprint = gameData.currentStamina >= STAMINA_RECOVERY_THRESHOLD;
+}
+
+export function startSprint() {
+	if (gameData.canSprint && !gameData.isSprintingActive) {
+		gameData.isSprintingActive = true;
+	}
+}
+
+export function stopSprint() {
+	gameData.isSprintingActive = false;
+}
+
+export function updateStaminaBar() {
+	const staminaBarFill = document.getElementById('staminaBarFill');
+	if (staminaBarFill) {
+		const percentage = (gameData.currentStamina / MAX_STAMINA) * 100;
+		staminaBarFill.style.width = percentage + '%';
+
+		if (percentage > 50) {
+			staminaBarFill.style.backgroundColor = '#4ade80'; // green
+		} else if (percentage > 25) {
+			staminaBarFill.style.backgroundColor = '#fbbf24'; // yellow
+		} else {
+			staminaBarFill.style.backgroundColor = '#f87171'; // red
+		}
+	}
 }
