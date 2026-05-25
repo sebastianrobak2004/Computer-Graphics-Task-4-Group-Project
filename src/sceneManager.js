@@ -1,7 +1,14 @@
 import * as THREE from 'three';
 import { collisionMain } from './collision';
 import { setupFloor, updateFloorShaders } from './floor';
-import { initializeGame, manageGame, gameData } from './gameManager';
+import {
+	initializeGame,
+	manageGame,
+	gameData,
+	getCurrentGameState,
+	GameState,
+	setState,
+} from './gameManager';
 import {
 	levelUpdate,
 	startLevelGeneration,
@@ -46,6 +53,7 @@ export function doSetup() {
 	setupPlayer();
 
 	initializeGame();
+	setState(GameState.MENU);
 
 	renderer.setAnimationLoop(update);
 }
@@ -54,10 +62,16 @@ function update() {
 	if (!isScenePaused) {
 		timer.update();
 
-		doMove();
-		collisionMain();
-		levelUpdate();
-		updateFloorShaders();
+		if (getCurrentGameState() === GameState.PLAYING) {
+			doMove();
+			collisionMain();
+			levelUpdate();
+			updateFloorShaders();
+		} else if (getCurrentGameState() === GameState.MENU) {
+			// Update level generation even during menu for visual feedback
+			levelUpdate();
+			updateFloorShaders();
+		}
 
 		if (gameData.isSprintingActive) {
 			camera.fov = BASE_FOV + SPRINT_FOV_INCREASE;
@@ -65,6 +79,13 @@ function update() {
 			camera.fov = BASE_FOV;
 		}
 		camera.updateProjectionMatrix();
+	}
+
+	// Update camera position based on game state
+	if (getCurrentGameState() === GameState.MENU) {
+		// Position camera vertically over center of map
+		camera.position.set(0, 50, 0);
+		camera.lookAt(0, 0, 0);
 	}
 
 	renderer.setRenderTarget(renderTarget);

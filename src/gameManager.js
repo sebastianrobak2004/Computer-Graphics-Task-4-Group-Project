@@ -1,6 +1,10 @@
 import { isHit, resetCollision } from './collision';
 import { pauseScene, resumeScene, scene } from './sceneManager';
-import { level, startLevelGeneration } from './LevelGeneration/levelGenerator';
+import {
+	level,
+	startLevelGeneration,
+	setLevelSpeed,
+} from './LevelGeneration/levelGenerator';
 import { player } from './player';
 import { ringGeometryOuterRadius } from './ring';
 
@@ -29,7 +33,6 @@ let currentGameState = GameState.PLAYING;
 let gameOverTime = null;
 
 export function initializeGame() {
-	currentGameState = GameState.PLAYING;
 	gameData.score = 0;
 	gameData.startTime = Date.now();
 	gameData.currentTime = 0;
@@ -49,13 +52,27 @@ export function setState(newState) {
 
 	currentGameState = newState;
 
-	if (newState === GameState.GAMEOVER) {
+	if (newState === GameState.MENU) {
+		pauseScene();
+		hideGameOverOverlay();
+		showMainMenuOverlay();
+		hideStaminaBar();
+		setLevelSpeed(1.5);
+		if (level && level.parent) {
+			scene.remove(level);
+		}
+	} else if (newState === GameState.GAMEOVER) {
 		gameOverTime = Date.now();
 		pauseScene();
+		hideMainMenuOverlay();
 		showGameOverOverlay();
+		hideStaminaBar();
 	} else if (newState === GameState.PLAYING) {
 		resumeScene();
 		hideGameOverOverlay();
+		hideMainMenuOverlay();
+		showStaminaBar();
+		setLevelSpeed(1.2);
 	}
 }
 
@@ -99,6 +116,34 @@ function hideGameOverOverlay() {
 	}
 }
 
+function showMainMenuOverlay() {
+	const overlay = document.getElementById('mainMenuOverlay');
+	if (overlay) {
+		overlay.classList.add('active');
+	}
+}
+
+function hideMainMenuOverlay() {
+	const overlay = document.getElementById('mainMenuOverlay');
+	if (overlay) {
+		overlay.classList.remove('active');
+	}
+}
+
+function showStaminaBar() {
+	const staminaBar = document.getElementById('staminaBar');
+	if (staminaBar) {
+		staminaBar.classList.remove('hidden');
+	}
+}
+
+function hideStaminaBar() {
+	const staminaBar = document.getElementById('staminaBar');
+	if (staminaBar) {
+		staminaBar.classList.add('hidden');
+	}
+}
+
 export function restartGame() {
 	if (level && level.parent) {
 		scene.remove(level);
@@ -113,8 +158,33 @@ export function restartGame() {
 
 	initializeGame();
 	hideGameOverOverlay();
+	showStaminaBar();
 	resumeScene();
 	setState(GameState.PLAYING);
+}
+
+export function startGame() {
+	if (currentGameState !== GameState.MENU) return;
+
+	startLevelGeneration();
+
+	resetCollision();
+	if (player) {
+		player.position.set(0, 0, ringGeometryOuterRadius);
+	}
+
+	initializeGame();
+	setState(GameState.PLAYING);
+}
+
+export function returnToMenu() {
+	if (level && level.parent) {
+		scene.remove(level);
+	}
+
+	gameData.score = 0;
+	gameData.elapsedSeconds = 0;
+	setState(GameState.MENU);
 }
 
 export function updateStamina() {

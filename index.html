@@ -6,9 +6,18 @@
 		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
-		<div id="staminaBar">
+		<div id="staminaBar" class="hidden">
 			<div id="staminaBarFill"></div>
 			<div id="staminaBarLabel">Stamina</div>
+		</div>
+
+		<div id="mainMenuOverlay">
+			<div class="menu-panel">
+				<h1>HYPER RUN</h1>
+				<div class="button-container">
+					<button id="startGameButton">Start Game</button>
+				</div>
+			</div>
 		</div>
 
 		<div id="gameOverOverlay">
@@ -40,17 +49,24 @@
 		</script>
 
 		<script type="module">
-			import { restartGame } from './src/gameManager.js';
+			import {
+				restartGame,
+				startGame,
+				returnToMenu,
+			} from './src/gameManager.js';
 
-			// Restart button handler
+			document
+				.getElementById('startGameButton')
+				.addEventListener('click', () => {
+					startGame();
+				});
+
 			document.getElementById('restartButton').addEventListener('click', () => {
 				restartGame();
 			});
 
-			// Menu button handler (placeholder - implement menu later)
 			document.getElementById('menuButton').addEventListener('click', () => {
-				console.log('Menu button clicked');
-				// TODO: Implement menu navigation
+				returnToMenu();
 			});
 		</script>
 

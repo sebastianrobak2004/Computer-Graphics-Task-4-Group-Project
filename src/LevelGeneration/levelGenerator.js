@@ -7,8 +7,14 @@ import { levelShad } from './ringShader.js';
 const epsilon = 0.1;
 const ringDivisions = 8;
 
+let levelSpeed = 0.7;
+
 export let level;
 export let levelUpdate = () => {}; // Will be set by startLevelGeneration
+
+export function setLevelSpeed(speed) {
+	levelSpeed = speed;
+}
 
 export const startLevelGeneration = () => {
 	level = new THREE.Group();
@@ -18,7 +24,6 @@ export const startLevelGeneration = () => {
 
 	const MAX_RINGS = 20;
 	const MAX_SCALE = 1024;
-	const SPEED = 0.7;
 
 	let derivedRadius = 1;
 	let currentLevel = null;
@@ -34,7 +39,7 @@ export const startLevelGeneration = () => {
 
 	levelUpdate = () => {
 		const delta = timer.getDelta();
-		const growth = SPEED * delta;
+		const growth = levelSpeed * delta;
 		const multiplier = 1 + growth;
 		derivedRadius *= multiplier;
 

@@ -36,6 +36,33 @@ canvas {
 	pointer-events: auto;
 }
 
+/* Main Menu Overlay */
+#mainMenuOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.85);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.3s ease-in-out;
+	z-index: 1000;
+}
+
+#mainMenuOverlay.active {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+#mainMenuOverlay:not(.active) {
+	opacity: 0;
+	pointer-events: none;
+}
+
 .game-over-panel {
 	background: linear-gradient(135deg, #1f1f1f 0%, #0f0f0f 100%);
 	border: 3px solid #aa2020;
@@ -48,6 +75,30 @@ canvas {
 		inset 0 0 20px rgba(170, 32, 32, 0.05);
 	max-width: 500px;
 	animation: slideIn 0.5s ease-out;
+}
+
+.menu-panel {
+	background: linear-gradient(135deg, #1f1f1f 0%, #0f0f0f 100%);
+	border: 3px solid #aa2020;
+	border-radius: 15px;
+	padding: 80px 50px;
+	text-align: center;
+	color: white;
+	box-shadow:
+		0 0 30px rgba(170, 32, 32, 0.4),
+		inset 0 0 20px rgba(170, 32, 32, 0.05);
+	max-width: 500px;
+	animation: slideIn 0.5s ease-out;
+}
+
+.menu-panel h1 {
+	font-size: 4em;
+	margin-bottom: 60px;
+	color: #dd6666;
+	text-shadow:
+		0 0 10px rgba(221, 102, 102, 0.5),
+		0 0 20px rgba(170, 32, 32, 0.3);
+	letter-spacing: 3px;
 }
 
 @keyframes slideIn {
@@ -137,6 +188,21 @@ button {
 	transform: scale(0.95);
 }
 
+#startGameButton {
+	background: linear-gradient(135deg, #aa2020 0%, #881010 100%);
+	color: white;
+	box-shadow: 0 0 15px rgba(170, 32, 32, 0.4);
+}
+
+#startGameButton:hover {
+	transform: scale(1.05);
+	box-shadow: 0 0 25px rgba(170, 32, 32, 0.6);
+}
+
+#startGameButton:active {
+	transform: scale(0.95);
+}
+
 #menuButton {
 	background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
 	color: #cccccc;
@@ -165,6 +231,12 @@ button {
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 	z-index: 100;
 	overflow: hidden;
+	transition: opacity 0.3s ease-in-out;
+}
+
+#staminaBar.hidden {
+	opacity: 0;
+	pointer-events: none;
 }
 
 #staminaBarFill {
