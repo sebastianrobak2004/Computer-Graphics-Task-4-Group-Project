@@ -81,7 +81,7 @@ void main() {
     //color *= 20.;
     
     color.xyz = Tonemap_tanh(color.xyz);
-    color.xyz = SRGB_encode(color.xyz);
+    //color.xyz = SRGB_encode(color.xyz);
     //color *= 50.0;
     //color *= 0.85;
     

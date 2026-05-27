@@ -18,6 +18,12 @@ import { setupPlayer } from './player';
 import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
 import postProcessingFragment from './shaders/postFrag.glsl?raw';
 
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { FXAAPass } from 'three/addons/postprocessing/FXAAPass.js';
+
 const BASE_FOV = 90;
 const SPRINT_FOV = 105;
 
@@ -28,11 +34,11 @@ let renderer;
 let sunlight;
 
 // post processing
-let renderTarget;
 let postCamera;
 let postScene;
 let postMaterial;
 let postQuad;
+let composer;
 
 let isScenePaused = false;
 
@@ -44,7 +50,6 @@ export function doSetup() {
 	setupSunlight();
 	setupTimer();
 	setupResizeFunction();
-	setupPostProcessing();
 
 	// Geometry setup
 	setupFloor();
@@ -88,12 +93,7 @@ function update() {
 		camera.lookAt(0, 0, 0);
 	}
 
-	renderer.setRenderTarget(renderTarget);
-	renderer.render(scene, camera);
-	renderer.setRenderTarget(null);
-
-	renderer.render(postScene, postCamera);
-
+	composer.render();
 	manageGame();
 }
 
@@ -119,19 +119,49 @@ const setupScene = () => {
 };
 
 const setupRenderer = () => {
-	renderer = new THREE.WebGLRenderer();
+
+	renderer = new THREE.WebGLRenderer({
+		antialias: false
+	});
+
+    renderer.setPixelRatio(2.0);
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 
-	const SSAA = 4.0;
+	composer = new EffectComposer(renderer);
 
-	renderTarget = new THREE.WebGLRenderTarget(
-		window.innerHeight * SSAA,
-		window.outerHeight * SSAA,
-	);
-	renderTarget.texture.minFilter = THREE.LinearFilter;
-	renderTarget.texture.magFilter = THREE.LinearFilter;
-	renderTarget.texture.generateMipmaps = false;
+	const renderPass = new RenderPass(scene, camera);
+
+    const postPass = new ShaderPass(new THREE.ShaderMaterial({
+        uniforms: {
+            tDiffuse: { value: null },
+            u_texel: {
+                value: new THREE.Vector2(1 / window.innerWidth, 1 / window.innerHeight),
+            },
+            u_shape: {
+                value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+            },
+        },
+
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = vec4(position.xy, 0.0, 1.0);
+            }
+        `,
+
+        fragmentShader: postProcessingFragment
+    }));
+
+    composer.addPass(renderPass);
+    composer.addPass(postPass);
+    const fxaaPass = new FXAAPass();
+    composer.addPass(fxaaPass);
+    
+    composer.addPass(new OutputPass());
+
+
 };
 
 const setupSunlight = () => {
@@ -159,39 +189,6 @@ const setupResizeFunction = () => {
 	window.addEventListener('resize', OnResize);
 };
 
-const setupPostProcessing = () => {
-	postScene = new THREE.Scene();
-	postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-	postMaterial = new THREE.ShaderMaterial({
-		uniforms: {
-			tDiffuse: { value: renderTarget.texture },
-			u_texel: {
-				value: new THREE.Vector2(1 / window.innerWidth, 1 / window.innerHeight),
-			},
-			u_shape: {
-				value: new THREE.Vector2(window.innerWidth, window.innerHeight),
-			},
-		},
-
-		minFilter: THREE.NearestFilter,
-		magFilter: THREE.NearestFilter,
-		generateMipmaps: true,
-
-		vertexShader: `
-			varying vec2 vUv;
-			void main() {
-				vUv = uv;
-				gl_Position = vec4(position, 1.0);
-			}
-		`,
-		fragmentShader: postProcessingFragment,
-	});
-
-	postQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMaterial);
-
-	postScene.add(postQuad);
-};
 
 // Helper functions
 export const pauseScene = () => (isScenePaused = true);
