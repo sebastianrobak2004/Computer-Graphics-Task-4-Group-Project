@@ -19,7 +19,7 @@ import { ringGeometryOuterRadius, setupMovementPathRing } from './ring';
 import postProcessingFragment from './shaders/postFrag.glsl?raw';
 
 const BASE_FOV = 90;
-const SPRINT_FOV_INCREASE = 15;
+const SPRINT_FOV = 105;
 
 export let camera;
 export let scene;
@@ -74,9 +74,9 @@ function update() {
 		}
 
 		if (gameData.isSprintingActive) {
-			camera.fov = BASE_FOV + SPRINT_FOV_INCREASE;
+			camera.fov = lerp(camera.fov, SPRINT_FOV, 0.5);
 		} else {
-			camera.fov = BASE_FOV;
+			camera.fov = lerp(camera.fov, BASE_FOV, 0.5);
 		}
 		camera.updateProjectionMatrix();
 	}
@@ -197,3 +197,7 @@ const setupPostProcessing = () => {
 export const pauseScene = () => (isScenePaused = true);
 export const resumeScene = () => (isScenePaused = false);
 export const isSceneRunning = () => !isScenePaused;
+
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
