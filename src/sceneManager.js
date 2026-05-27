@@ -79,9 +79,9 @@ function update() {
 		}
 
 		if (gameData.isSprintingActive) {
-			camera.fov = lerp(camera.fov, SPRINT_FOV, 0.5);
+			camera.fov = lerp(camera.fov, SPRINT_FOV, 0.1);
 		} else {
-			camera.fov = lerp(camera.fov, BASE_FOV, 0.5);
+			camera.fov = lerp(camera.fov, BASE_FOV, 0.1);
 		}
 		camera.updateProjectionMatrix();
 	}
