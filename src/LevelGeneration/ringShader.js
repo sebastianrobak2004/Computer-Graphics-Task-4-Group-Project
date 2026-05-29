@@ -12,10 +12,6 @@ export const levelShad = new THREE.ShaderMaterial({
         u_time: { value: 0.0 },
     },
 
-    minFilter: THREE.NearestFilter,
-    magFilter: THREE.NearestFilter,
-    generateMipmaps: true,
-
     vertexShader: vert,
     fragmentShader: frag,
     

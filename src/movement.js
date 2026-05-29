@@ -4,14 +4,15 @@ import { player } from './player';
 import { camera } from './sceneManager';
 import { ringGeometryOuterRadius } from './ring';
 import { gameData, startSprint, stopSprint } from './gameManager';
+import { timer } from './sceneManager.js';
 
 // Constants
 var effectiveSpeed = 0.03;
 
-const SPRINT_SPEED = 0.045;
-const WALK_SPEED = 0.03;
+const SPRINT_SPEED = 12;
+const WALK_SPEED = 8;
 
-const FACTOR = 0.3;
+const FACTOR = 0.8;
 
 
 const SPRINT_SPEED_MULTIPLIER = 1.5;
@@ -39,11 +40,11 @@ export function doMove() {
 
 
 	if (movementState.isMovingLeft) {
-		playerAngle += effectiveSpeed;
+		playerAngle += effectiveSpeed * timer.getDelta();
 	}
 
 	if (movementState.isMovingRight) {
-		playerAngle -= effectiveSpeed;
+		playerAngle -= effectiveSpeed * timer.getDelta();
 	}
 
 

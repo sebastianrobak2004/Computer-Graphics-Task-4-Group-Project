@@ -4,6 +4,7 @@ import {
 	level,
 	startLevelGeneration,
 	setLevelSpeed,
+    disposeLevel,
 } from './LevelGeneration/levelGenerator';
 import { player } from './player';
 import { ringGeometryOuterRadius } from './ring';
@@ -147,10 +148,12 @@ function hideStaminaBar() {
 export function restartGame() {
 	if (level && level.parent) {
 		scene.remove(level);
+        disposeLevel();
 	}
+    console.log("test");
 
 	startLevelGeneration();
-
+    
 	resetCollision();
 	if (player) {
 		player.position.set(0, 0, ringGeometryOuterRadius);

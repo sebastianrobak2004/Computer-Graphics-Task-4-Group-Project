@@ -13,3 +13,8 @@ Hyper demon + InfinatePizza
 ![InfinatePizzaExample](https://img.itch.zone/aW1hZ2UvODU0NjcxLzQ3OTQwNjguanBn/original/8arXLC.jpg)
 
 </details>
+
+
+running the project:
+
+npm run dev

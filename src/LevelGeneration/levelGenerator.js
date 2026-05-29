@@ -10,13 +10,29 @@ const ringDivisions = 8;
 let levelSpeed = 0.7;
 
 export let level;
-export let levelUpdate = () => {}; // Will be set by startLevelGeneration
+export let levelUpdate = () => {}; 
 
 export function setLevelSpeed(speed) {
 	levelSpeed = speed;
 }
 
+export const disposeLevel = () => {
+  scene.remove(level);
+
+  level.traverse(obj => {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) obj.material.dispose();
+  });
+
+  levelUpdate = () => {};
+  level = null;
+};
+
 export const startLevelGeneration = () => {
+
+    
+
+
 	level = new THREE.Group();
 
 	const ring = createRingMesh(ringDivisions);
